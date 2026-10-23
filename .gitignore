@@ -39,3 +39,16 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# IDE
+/.idea/
+
+# captures et rapports d'audit design (outil local)
+/.taste-skill/
+
+# documents client : sources brutes et documents privés, jamais servis par le site
+/public/dossier-client/
+/public/*.pdf
+
+# médias non utilisés par les maquettes
+/public/media/founder-family.jpg
