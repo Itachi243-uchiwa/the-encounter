@@ -10,6 +10,11 @@ const nextConfig: NextConfig = {
     qualities: [90],
     formats: ["image/avif", "image/webp"],
   },
+  // Les fichiers bruts de la cliente (rushes, exports Spotify : des dizaines de Go, ignorés par git) ne font pas
+  // partie du site : le traçage des fichiers serveur ne doit pas les lire (le build échoue sur les vidéos de 4 Go).
+  outputFileTracingExcludes: {
+    "**": ["public/dossier-client/**/*"],
+  },
   cacheComponents: true,
   partialPrefetching: true,
   turbopack: {

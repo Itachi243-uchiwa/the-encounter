@@ -29,6 +29,9 @@ const split: Behaviour = (root, { loadDelay }) => {
       type: type === "chars" ? "lines,chars" : "lines",
       mask: "lines",
       linesClass: "splitline",
+      // Lignes : les mots restent entiers, le texte d'origine reste lisible tel quel par les lecteurs d'écran
+      // (« auto » poserait un aria-label, interdit sur <span> et <p>). Lettres : il faut l'étiquette.
+      aria: type === "chars" ? "auto" : "none",
       autoSplit: true,
       onSplit(self) {
         const targets = type === "chars" ? self.chars : self.lines;
@@ -90,7 +93,7 @@ const parallax: Behaviour = (root) => {
 const scrubWords: Behaviour = (root) => {
   const { gsap, SplitText } = getGsap();
   root.querySelectorAll<HTMLElement>("[data-scrub-words]").forEach((el) => {
-    const { words } = SplitText.create(el, { type: "words" });
+    const { words } = SplitText.create(el, { type: "words", aria: "none" });
     gsap.fromTo(
       words,
       { opacity: 0.16 },

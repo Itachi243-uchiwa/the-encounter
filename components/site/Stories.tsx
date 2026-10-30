@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Episode } from "@/content/types";
 import type { Copy } from "./copy";
 import { usePlayer } from "./Player";
-import styles from "./clair-obscur.module.css";
+import styles from "./site.module.css";
 
 /** Durée d'une story sans extrait vidéo (photo). Avec un extrait, la story dure le temps de l'extrait. */
 const PHOTO_MS = 7000;
@@ -140,7 +140,7 @@ export function Stories({ episodes, t }: { episodes: Episode[]; t: Copy }) {
             <Image src={story.cover.src} alt="" fill sizes="36px" style={{ objectFit: "cover", objectPosition: "50% 22%" }} />
           </span>
           <span>
-            <strong>{t.portrait}</strong> · {t.episode} {story.number}
+            <strong>{story.guest ?? t.portrait}</strong> · {t.episode} {story.number}
           </span>
           {story.clip ? (
             <button type="button" className={styles.storySound} onClick={toggleSound} aria-pressed={!muted} aria-label={muted ? t.soundOn : t.soundOff}>

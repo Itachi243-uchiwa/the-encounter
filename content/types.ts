@@ -1,4 +1,5 @@
 import type { Feature } from "@/lib/features";
+import type { RouteKey } from "@/lib/routes";
 
 export type ThemeId = "foi" | "identite" | "relations" | "temoignages" | "parcours";
 
@@ -24,10 +25,20 @@ export interface Clip {
   captions?: string;
 }
 
+/** Une partie d'un épisode publié en plusieurs vidéos. */
+export interface EpisodePart {
+  youtubeId: string;
+  durationMinutes: number;
+  /** La même partie sur Spotify, quand elle y est publiée. */
+  spotifyId?: string;
+}
+
 export interface Episode {
   slug: string;
   number: number;
   title: string;
+  /** La ou les personnes dont c'est le portrait. */
+  guest?: string;
   /** Une phrase qui donne envie d'écouter. */
   hook: string;
   /** Citation marquante extraite de l'épisode (Journal). */
@@ -38,6 +49,10 @@ export interface Episode {
   cover: Photo;
   /** Identifiant de la vidéo YouTube (les vidéos ne sont jamais hébergées sur le site). */
   youtubeId?: string;
+  /** Identifiant de l'épisode sur Spotify (open.spotify.com/episode/…), quand il y est publié. */
+  spotifyId?: string;
+  /** Toutes les parties, dans l'ordre, quand l'épisode est publié en plusieurs vidéos. */
+  parts?: EpisodePart[];
   /** Extrait vertical de l'épisode (le même que sur TikTok / Instagram), lu dans les stories. */
   clip?: Clip;
   /** Annoncé mais pas encore diffusé : visible, pas encore écoutable. */
@@ -66,10 +81,7 @@ export interface Verse {
 }
 
 export interface NavItem {
-  label: string;
-  /** Route définitive du site. */
-  href: string;
-  /** Ancre sur la page d'accueil, utilisée par les maquettes. */
-  anchor: string;
+  /** La page visée ; son adresse et son libellé dépendent de la langue. */
+  route: RouteKey;
   feature: Feature;
 }

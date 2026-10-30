@@ -5,7 +5,7 @@ import type { Journey } from "@/content/journeys";
 import type { Episode } from "@/content/types";
 import type { Copy } from "./copy";
 import { usePlayer } from "./Player";
-import styles from "./clair-obscur.module.css";
+import styles from "./site.module.css";
 
 /** Tuile « Ce que tu vis » : une situation, une parole, et l'épisode à écouter. */
 export function JourneyTile({ journeys, episodes, t }: { journeys: Journey[]; episodes: Episode[]; t: Copy }) {

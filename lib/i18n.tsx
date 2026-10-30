@@ -1,9 +1,10 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import type { Lang } from "./lang";
+import { LANG_COOKIE, localizePath } from "./routes";
 
-export type Lang = "fr" | "en";
-export const langs: Lang[] = ["fr", "en"];
+export type { Lang };
 
 interface LangState {
   lang: Lang;
@@ -11,7 +12,6 @@ interface LangState {
 }
 
 const LangContext = createContext<LangState | null>(null);
-const STORAGE_KEY = "encounter-lang";
 
 export function useLang() {
   const ctx = useContext(LangContext);
@@ -20,22 +20,16 @@ export function useLang() {
 }
 
 /**
- * Langue de l'interface. Le changement est instantané : tous les textes sont déjà
- * dans la page, on ne recharge rien. Le choix est retenu pour la visite suivante.
+ * Langue de l'interface, donnée par l'adresse (/… ou /en/…). Le changement est
+ * instantané : tous les textes sont déjà dans la page, on change l'état, puis on
+ * met l'adresse à jour (sans navigation) et on retient le choix dans un cookie.
  */
-export function LangProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>("fr");
+export function LangProvider({ initial, children }: { initial: Lang; children: ReactNode }) {
+  const [lang, setLangState] = useState<Lang>(initial);
 
-  useEffect(() => {
-    let saved: string | null = null;
-    try {
-      saved = window.localStorage.getItem(STORAGE_KEY);
-    } catch {}
-    const initial = saved === "en" || saved === "fr" ? saved : navigator.language.toLowerCase().startsWith("en") ? "en" : "fr";
-    // Lecture d'une préférence du navigateur, disponible seulement après l'hydratation.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (initial !== "fr") setLangState(initial);
-  }, []);
+  // Navigation client vers une page de l'autre langue (lien /en/…) : l'adresse fait foi.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => setLangState(initial), [initial]);
 
   useEffect(() => {
     document.documentElement.lang = lang;
@@ -43,9 +37,10 @@ export function LangProvider({ children }: { children: ReactNode }) {
 
   const setLang = useCallback((next: Lang) => {
     setLangState(next);
-    try {
-      window.localStorage.setItem(STORAGE_KEY, next);
-    } catch {}
+    document.cookie = `${LANG_COOKIE}=${next}; path=/; max-age=31536000; samesite=lax`;
+    const { pathname, search, hash } = window.location;
+    const target = localizePath(pathname, next);
+    if (target !== pathname) window.history.replaceState(window.history.state, "", target + search + hash);
   }, []);
 
   return <LangContext.Provider value={{ lang, setLang }}>{children}</LangContext.Provider>;

@@ -11,11 +11,12 @@ const en = {
     tagline: "The encounter that transforms",
     promise: "One encounter with God can change everything.",
     pitch: "Conversations about faith, the journey and transformation.",
+    description: "The Encounter is a platform of conversations that inspires faith, identity and a life transformed in Christ.",
   },
   vision: {
     burningBush:
       "Like Moses at the burning bush, we believe a single encounter with God can turn a life around, change a story and awaken a calling.",
-    closing: "I met God… and my life has never been the same.",
+    closing: "I met God… And my life has never been the same.",
     statement:
       "To see every person live an authentic encounter with God, one that transforms, restores and sets them back on the path of their true destiny.",
     intention: "God never meets anyone without a purpose.",

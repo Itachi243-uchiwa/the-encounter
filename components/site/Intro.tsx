@@ -1,5 +1,5 @@
 import { markPath } from "@/components/brand/paths";
-import styles from "./clair-obscur.module.css";
+import styles from "./site.module.css";
 
 /** Durée de l'ouverture : les animations « au chargement » du hero attendent qu'elle se lève. */
 export const INTRO_SECONDS = 1.4;

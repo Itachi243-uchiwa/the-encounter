@@ -8,7 +8,7 @@ import type { Episode } from "@/content/types";
 import { formatDuration } from "@/lib/navigation";
 import type { Copy } from "./copy";
 import { usePlayer } from "./Player";
-import styles from "./clair-obscur.module.css";
+import styles from "./site.module.css";
 
 const PlayIcon = ({ size = 16 }: { size?: number }) => (
   <svg viewBox="0 0 24 24" width={size} height={size} fill="currentColor" aria-hidden>
@@ -115,7 +115,7 @@ export function Playlist({ episodes, t }: { episodes: Episode[]; t: Copy }) {
                 </span>
               </span>
               <span className={styles.trackCol}>{t.portrait}</span>
-              <span className={styles.trackCol}>{date.format(new Date(episode.publishedAt))}</span>
+              <span className={styles.trackCol}>{episode.upcoming ? "" : date.format(new Date(episode.publishedAt))}</span>
               <span className={styles.trackDur}>{episode.upcoming ? t.soon : formatDuration(episode.durationMinutes)}</span>
             </>
           );

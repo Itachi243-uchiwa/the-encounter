@@ -43,9 +43,16 @@ Shop, back-office d'administration, section Événements, espace membre, abonnem
   - redondance retirée : l'étagère « Portraits » (doublon de la playlist) est supprimée ; stories = donner envie, playlist = écouter ;
   - animations : égaliseur sur l'épisode en cours, onde sur le grand bouton lecture, pistes et cartes qui arrivent en cascade, survols (zoom des photos, cartes qui se soulèvent), boutons aimantés, barre de navigation qui se cache en descendant.
 - Textes de la cliente : hero, « The Encounter Podcast », « Portrait » à la place des thèmes, 8 épisodes avec leur phrase de résumé (l'épisode 8 en « Bientôt »), phrase « J'ai rencontré Dieu… », aucun nombre d'épisodes affiché, photo de la fondatrice choisie.
-- Logos vectorisés depuis la charte : `public/brand/mark.svg` (E étoilé), `public/brand/wordmark.svg` (The ENCNTR).
+- Logos vectorisés depuis la charte : `public/brand/mark.svg` (E étoilé), `public/brand/wordmark.svg` (The ENCOUNTER : lettres de la charte, O et U dessinés dans la même famille).
 - Médias : photos réexportées depuis les originaux (jusqu'à 3200 px, JPEG 92, couleurs non sous-échantillonnées), qualité Next/Image à 90 en AVIF/WebP, affiches vidéo refaites depuis les vidéos 4K, vidéos laissées en 4K d'origine.
 - FR / EN instantané sur la maquette (≈ 50 ms, sans rechargement), choix mémorisé.
+
+### Avancement au 30/10 (soir)
+
+- J1–J5 : arborescence `[lang]`, `proxy.ts`, nav, pied de page, Podcast, fiches épisodes + images OG, Vision, Soutenir, Collaborer.
+- Soutenir : **formulaire des donateurs** (demande de la cliente) : nom, e-mail, montant facultatif, mot ou sujet de prière.
+- J6 : formulaire de contact (Server Action `lib/contact.ts`, champ piège, 3 envois / 10 min par IP, Resend + accusé de réception à texte fixe, sujet pré-rempli par `?sujet=`) ; Collaborer y mène avec le bon sujet ; FAQ (8 questions proposées, à valider) ; mentions légales, confidentialité, cookies (champs `[à compléter]` en attente de la cliente) ; bandeau cookies, YouTube et Spotify chargés seulement après accord.
+- Variables Vercel à poser : `RESEND_API_KEY`, `CONTACT_FROM` (adresse du domaine vérifié chez Resend), `CONTACT_TO`. Sans clé en local, les messages s'affichent dans le terminal.
 
 ---
 
@@ -135,7 +142,7 @@ Contrastes WCAG AA, navigation clavier complète (lecteur, fenêtre, sélecteurs
 | Photo et date de l'épisode 8 « L'homme derrière l'artiste » | Fiche « bientôt » | 3/11 |
 | Validation des 7 extraits des stories (passage choisi, sous-titres relus) — extraits faits le 30/10 depuis les vidéos des épisodes | Stories « Ils ont rencontré Dieu » | 3/11 |
 | Relecture de l'anglais par une personne anglophone | Pages EN | 6/11 |
-| Adresse email de contact définitive (actuellement « à confirmer ») | Formulaire, pied de page | 4/11 |
+| ~~Adresse email de contact définitive~~ : reçue le 30/10, `contact@thencounter.be` | Formulaire, pied de page | fait |
 | Questions et réponses de la FAQ | Page FAQ | 4/11 |
 | Mentions légales : nom légal, n° BCE ou personne physique, adresse ; bénéficiaire des dons | Pages légales, Soutenir | 4/11 |
 | Lien Spotify / Apple Podcasts s'il existe | Plateformes d'écoute | 4/11 |

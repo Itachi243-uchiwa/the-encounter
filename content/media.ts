@@ -25,10 +25,10 @@ export const photos = {
   guestEp6: portrait("/media/guest-ep6.jpg", "Portrait de l'invitée de l'épisode 6 devant le rideau"),
   guestEp6b: portrait("/media/guest-ep6-b.jpg", "Invitée de l'épisode 6 en veste de cuir"),
   guestEp7: portrait("/media/guest-ep7.jpg", "Invité de l'épisode 7 en pull rayé", 1600, 2000),
-  mug: portrait("/media/mug.jpg", "La tasse The ENCNTR posée sur la table du plateau"),
-  cards: { src: "/media/cards.jpg", alt: "Les cartes de questions The ENCNTR sur la table", width: 1707, height: 1707 },
+  mug: portrait("/media/mug.jpg", "La tasse The Encounter posée sur la table du plateau"),
+  cards: { src: "/media/cards.jpg", alt: "Les cartes de questions The Encounter sur la table", width: 1707, height: 1707 },
   notes: portrait("/media/notes.jpg", "Notes manuscrites et tasse avant l'enregistrement"),
-  titleCard: { src: "/media/title-card.jpg", alt: "Écran titre « The Encounter — La rencontre qui transforme »", width: 900, height: 1600 },
+  titleCard: { src: "/media/title-card.jpg", alt: "Écran titre « The Encounter, la rencontre qui transforme »", width: 900, height: 1600 },
   eventStage: landscape("/media/event-stage.jpg", "La Rencontre du 27 septembre 2025 : louange sur scène"),
   eventPreach: portrait("/media/event-preach.jpg", "Prédication au pupitre pendant La Rencontre"),
   eventCrowd: landscape("/media/event-crowd.jpg", "L'assemblée applaudit pendant La Rencontre"),
@@ -39,6 +39,17 @@ export const photos = {
   founderPortrait: portrait("/media/founder-portrait.jpg", "Portrait de la fondatrice de The Encounter"),
 } satisfies Record<string, Photo>;
 
+
+/**
+ * Couverture d'un épisode : une image tirée de la vidéo de l'épisode lui-même (recadrée 4:5
+ * sur l'invité), pour que la photo corresponde toujours au bon portrait.
+ */
+export const episodeCover = (n: number): Photo => ({
+  src: `/media/covers/ep${n}.jpg`,
+  alt: `Invité de l'épisode ${n} sur le plateau The Encounter`,
+  width: 1036,
+  height: 1296,
+});
 
 /** Les deux seuls extraits hébergés (boucles muettes de quelques secondes) ; les épisodes restent sur YouTube. */
 export const clips = {

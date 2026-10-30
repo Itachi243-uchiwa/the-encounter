@@ -1,31 +1,52 @@
 "use client";
 
-import Image from "next/image";
+import { getImageProps } from "next/image";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Wordmark } from "@/components/brand/BrandMark";
 import { MOTION_OK, getGsap } from "@/components/motion/gsap";
 import type { Photo } from "@/content/types";
-import { langs, useLang } from "@/lib/i18n";
+import { useLang } from "@/lib/i18n";
+import { href } from "@/lib/routes";
 import type { Copy } from "./copy";
 import { INTRO_SECONDS } from "./Intro";
-import styles from "./clair-obscur.module.css";
+import styles from "./site.module.css";
 
 interface EncounterHeroProps {
   /** Chaque plan existe en large (écran) et en hauteur (téléphone). */
   photos: { wide: Photo; tall: Photo }[];
   t: Copy;
-  nav: { label: string; anchor: string }[];
 }
 
 const SLIDE_MS = 6500;
+
+/** Même seuil que le recadrage en hauteur de la feuille de style. */
+const TALL_MEDIA = "(max-aspect-ratio: 4 / 5)";
+
+/**
+ * Un plan en direction artistique : le navigateur ne télécharge que la version
+ * qui convient à l'écran (hauteur sur téléphone, large ailleurs). Le premier plan
+ * est l'image principale de la page (LCP) : chargé tout de suite, en priorité.
+ */
+function HeroPicture({ wide, tall, first }: { wide: Photo; tall: Photo; first: boolean }) {
+  const common = { fill: true, sizes: "100vw", alt: first ? wide.alt : "" } as const;
+  const { props: { srcSet: tallSet } } = getImageProps({ ...common, src: tall.src });
+  const { props: { alt, ...props } } = getImageProps({ ...common, src: wide.src, loading: first ? "eager" : "lazy", fetchPriority: first ? "high" : "auto" });
+  return (
+    <picture>
+      <source media={TALL_MEDIA} srcSet={tallSet} sizes="100vw" />
+      <img {...props} alt={alt} aria-hidden={!first} />
+    </picture>
+  );
+}
 
 /**
  * L'ouverture du Studio (le plateau en grand) dans la nuit du clair-obscur :
  * chaque plan entre par un rideau et dérive lentement ; au défilement, l'image
  * recule dans un cadre arrondi et le texte s'efface.
  */
-export function EncounterHero({ photos, t, nav }: EncounterHeroProps) {
-  const { lang, setLang } = useLang();
+export function EncounterHero({ photos, t }: EncounterHeroProps) {
+  const { lang } = useLang();
   const root = useRef<HTMLElement>(null);
   const [active, setActive] = useState(0);
   const [previous, setPrevious] = useState<number | null>(null);
@@ -56,7 +77,7 @@ export function EncounterHero({ photos, t, nav }: EncounterHeroProps) {
   useEffect(() => {
     const el = root.current;
     if (!el) return;
-    const { gsap, ScrollTrigger } = getGsap();
+    const { gsap } = getGsap();
     const q = gsap.utils.selector(el);
     const mm = gsap.matchMedia();
 
@@ -71,14 +92,6 @@ export function EncounterHero({ photos, t, nav }: EncounterHeroProps) {
         .to(q("[data-hero-frame]"), { scale: 0.86, borderRadius: 28, ease: "none" }, 0)
         .to(q("[data-hero-copy]"), { yPercent: -20, opacity: 0, ease: "none" }, 0);
 
-      // La barre se cache en descendant et revient dès qu'on remonte.
-      const bar = q("[data-nav]")[0];
-      const navState = ScrollTrigger.create({
-        start: 0,
-        end: "max",
-        onUpdate: (self) => bar.toggleAttribute("data-hidden", self.direction === 1 && self.scroll() > window.innerHeight),
-      });
-      return () => navState.kill();
     });
     return () => mm.revert();
   }, []);
@@ -89,9 +102,7 @@ export function EncounterHero({ photos, t, nav }: EncounterHeroProps) {
         <div className={styles.heroFrame} data-hero-frame>
           {photos.map(({ wide, tall }, i) => (
             <div key={wide.src} className={styles.heroSlide} data-state={i === active ? "active" : i === previous ? "previous" : undefined}>
-              {/* Un seul des deux est affiché ; l'autre, masqué, n'est jamais téléchargé (chargement différé). */}
-              <Image className={styles.heroWide} src={wide.src} alt={i === 0 ? wide.alt : ""} aria-hidden={i !== 0} fill loading={i === 0 ? "eager" : "lazy"} fetchPriority={i === 0 ? "high" : "auto"} sizes="100vw" />
-              <Image className={styles.heroTall} src={tall.src} alt="" aria-hidden fill loading="lazy" sizes="100vw" />
+              <HeroPicture wide={wide} tall={tall} first={i === 0} />
             </div>
           ))}
           <div className={styles.heroScrim} aria-hidden />
@@ -117,35 +128,13 @@ export function EncounterHero({ photos, t, nav }: EncounterHeroProps) {
             <a className={styles.pill} href="#podcast" data-magnetic>
               {t.heroAction}
             </a>
-            <a className={styles.chevron} href="#vision">
+            <Link className={styles.chevron} href={href("vision", lang)}>
               {t.heroLink} <span aria-hidden>›</span>
-            </a>
+            </Link>
           </div>
         </div>
       </div>
 
-      <nav className={styles.nav} aria-label="Navigation principale" data-nav>
-        <a href="#top" className={styles.wordmark} aria-label={t.backToTop}>
-          <Wordmark size={22} color="currentColor" label="" />
-        </a>
-        <ul>
-          {nav.map((item) => (
-            <li key={item.anchor}>
-              <a href={item.anchor}>{item.label}</a>
-            </li>
-          ))}
-        </ul>
-        <div className={styles.langSwitch} role="group" aria-label={t.langLabel}>
-          {langs.map((l) => (
-            <button key={l} type="button" aria-pressed={l === lang} lang={l} onClick={() => setLang(l)}>
-              {l.toUpperCase()}
-            </button>
-          ))}
-        </div>
-        <a className={styles.navPill} href="#podcast">
-          {t.navAction}
-        </a>
-      </nav>
     </header>
   );
 }

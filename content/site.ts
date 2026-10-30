@@ -2,7 +2,7 @@ import type { NavItem, Theme } from "./types";
 
 export const site = {
   name: "The Encounter",
-  shortName: "The ENCNTR",
+  shortName: "The Encounter",
   tagline: "La rencontre qui transforme",
   /** Textes d'ouverture validés par la fondatrice. */
   promise: "Une rencontre avec Dieu peut tout changer.",
@@ -11,24 +11,24 @@ export const site = {
   description:
     "The Encounter est une plateforme de conversations qui inspire la foi, l'identité et une vie transformée en Christ.",
   founder: "Jennifer Mondele",
-  email: "contact@theencounter.be", // À CONFIRMER
+  email: "contact@thencounter.be", // Confirmée par la cliente le 30/10
   links: {
     youtube: "https://www.youtube.com/channel/UC878pf2VoT_LxXC40uN0gQQ",
+    spotify: "https://open.spotify.com/show/3H0Bbb7jQGq6vCHHXkpXUR",
     instagram: "https://www.instagram.com/thencntr/",
     tiktok: "https://www.tiktok.com/@thencntr",
     support: "https://revolut.me/jennifermondele",
   },
 } as const;
 
-/** Où écouter et regarder — seules les plateformes confirmées (Linktree). Spotify / Apple Podcasts : à confirmer. */
+/** Où écouter et regarder : les plateformes confirmées. Apple Podcasts : à confirmer. */
 export const platforms = [
   { name: "YouTube", href: site.links.youtube, kind: "vidéo intégrale" },
+  { name: "Spotify", href: site.links.spotify, kind: "vidéo et audio" },
   { name: "TikTok", href: site.links.tiktok, kind: "extraits" },
   { name: "Instagram", href: site.links.instagram, kind: "coulisses" },
 ] as const;
 
-/** Lien « Pose ta question » pour les épisodes questions-réponses (mailto en V1, sans formulaire). */
-export const askQuestionHref = `mailto:${site.email}?subject=${encodeURIComponent("Ma question pour The Encounter")}`;
 
 /** Taxonomie proposée par le cahier (§3.4) — à valider. */
 export const themes: Theme[] = [
@@ -40,9 +40,10 @@ export const themes: Theme[] = [
 ];
 
 export const navigation: NavItem[] = [
-  { label: "Podcast", href: "/podcast", anchor: "#podcast", feature: "podcast" },
-  { label: "Événements", href: "/evenements", anchor: "#evenements", feature: "events" },
-  { label: "Shop", href: "/shop", anchor: "#shop", feature: "shop" },
-  { label: "Notre vision", href: "/vision", anchor: "#vision", feature: "vision" },
-  { label: "Collaborer", href: "/collaborer", anchor: "#collaborer", feature: "collaborate" },
+  { route: "podcast", feature: "podcast" },
+  { route: "events", feature: "events" },
+  { route: "shop", feature: "shop" },
+  { route: "vision", feature: "vision" },
+  { route: "support", feature: "support" },
+  { route: "collaborate", feature: "collaborate" },
 ];

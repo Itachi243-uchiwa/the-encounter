@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { LoopVideo } from "@/components/media/LoopVideo";
 import { MOTION_OK, getGsap } from "@/components/motion/gsap";
 import type { Clip } from "@/content/types";
-import styles from "./clair-obscur.module.css";
+import styles from "./site.module.css";
 
 interface StoryPinProps {
   clip: Clip;

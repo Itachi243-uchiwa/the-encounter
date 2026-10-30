@@ -1,6 +1,9 @@
-@import "tailwindcss";
+/* Tailwind ne lit que le code : jamais public/ (dossier client de plusieurs Go, vidéos). */
+@import "tailwindcss" source(none);
+@source "../app";
+@source "../components";
 
-/* Charte graphique The Encounter */
+/* Charte graphique The Encounter (couleurs et typographies du brandboard) */
 :root {
   --brand-bordeaux: #59101c;
   --brand-noir: #000000;
@@ -9,8 +12,10 @@
   --brand-jaune: #ffe432;
   --brand-ivoire: #f8f4ef;
 
+  /* Typographies de la charte : Titre = Impact, sous-titre = Amiri, texte courant = Helvetica. */
+  --font-title: Impact, var(--font-anton), "Arial Narrow", sans-serif;
   --font-serif: var(--font-amiri), Georgia, serif;
-  --font-text: var(--font-archivo), "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-text: "Helvetica Neue", Helvetica, Arial, sans-serif;
 
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --margin: clamp(16px, 2.2vw, 32px);

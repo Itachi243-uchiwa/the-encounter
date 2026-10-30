@@ -1,15 +1,17 @@
 "use client";
 
 import Image from "next/image";
-import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import Link from "next/link";
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { BrandMark } from "@/components/brand/BrandMark";
-import { YouTubePlayer } from "@/components/media/YouTubePlayer";
 import { site } from "@/content/site";
 import type { Episode } from "@/content/types";
 import { useLang } from "@/lib/i18n";
-import { formatDuration } from "@/lib/navigation";
+import { formatDuration, youtubeUrl } from "@/lib/navigation";
+import { episodeHref } from "@/lib/routes";
 import { copy } from "./copy";
-import styles from "./clair-obscur.module.css";
+import { EpisodeVideo } from "./EpisodeVideo";
+import styles from "./site.module.css";
 
 interface PlayerState {
   current: Episode;
@@ -37,35 +39,31 @@ export function PlayerProvider({ episodes, children }: { episodes: Episode[]; ch
   // On retient le slug, pas l'objet : l'épisode suit la langue choisie.
   const [slug, setSlug] = useState(released[0].slug);
   const current = released.find((e) => e.slug === slug) ?? released[0];
-  const t = copy[useLang().lang];
+  const { lang } = useLang();
+  const t = copy[lang];
   // Change à chaque fermeture : le lecteur est remonté, donc la vidéo s'arrête avec la fenêtre.
   const [session, setSession] = useState(0);
   const dialog = useRef<HTMLDialogElement>(null);
 
-  const select = useCallback(
-    (slug: string) => {
-      const next = episodes.find((e) => e.slug === slug);
-      if (next && !next.upcoming) setSlug(next.slug);
-    },
-    [episodes],
-  );
+  // Pas de useCallback : le compilateur React mémoïse ces fonctions lui-même.
+  const select = (target: string) => {
+    const next = episodes.find((e) => e.slug === target);
+    if (next && !next.upcoming) setSlug(next.slug);
+  };
 
-  const play = useCallback(
-    (slug?: string) => {
-      if (slug) select(slug);
-      const d = dialog.current;
-      if (!d) return;
-      // La fenêtre naît du bouton qui l'a ouverte (et y retourne en se fermant).
-      const trigger = document.activeElement !== document.body ? document.activeElement?.getBoundingClientRect() : undefined;
-      d.showModal();
-      d.style.transformOrigin = "";
-      if (trigger && trigger.bottom > 0 && trigger.top < window.innerHeight) {
-        const r = d.getBoundingClientRect();
-        d.style.transformOrigin = `${trigger.left + trigger.width / 2 - r.left}px ${trigger.top + trigger.height / 2 - r.top}px`;
-      }
-    },
-    [select],
-  );
+  const play = (target?: string) => {
+    if (target) select(target);
+    const d = dialog.current;
+    if (!d) return;
+    // La fenêtre naît du bouton qui l'a ouverte (et y retourne en se fermant).
+    const trigger = document.activeElement !== document.body ? document.activeElement?.getBoundingClientRect() : undefined;
+    d.showModal();
+    d.style.transformOrigin = "";
+    if (trigger && trigger.bottom > 0 && trigger.top < window.innerHeight) {
+      const r = d.getBoundingClientRect();
+      d.style.transformOrigin = `${trigger.left + trigger.width / 2 - r.left}px ${trigger.top + trigger.height / 2 - r.top}px`;
+    }
+  };
 
   return (
     <PlayerContext.Provider value={{ current, select, play }}>
@@ -85,13 +83,11 @@ export function PlayerProvider({ episodes, children }: { episodes: Episode[]; ch
             <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
           </svg>
         </button>
-        <YouTubePlayer
+        <EpisodeVideo
           key={`${current.slug}-${session}`}
+          episode={current}
+          t={t}
           className={styles.dialogPlayer}
-          videoId={current.youtubeId}
-          title={current.title}
-          poster={current.cover}
-          fallbackUrl={site.links.youtube}
           sizes="(max-width: 760px) 100vw, 880px"
         />
         <div className={styles.dialogBody}>
@@ -101,9 +97,14 @@ export function PlayerProvider({ episodes, children }: { episodes: Episode[]; ch
           <h2 id="dialog-title">{current.title}</h2>
           <p>{current.hook}</p>
           <blockquote>{t.quote(current.quote)}</blockquote>
-          <a className={styles.pill} href={site.links.youtube} target="_blank" rel="noopener">
-            {t.openYoutube}
-          </a>
+          <div className={styles.dialogLinks}>
+            <a className={styles.pill} href={youtubeUrl(current.youtubeId, site.links.youtube)} target="_blank" rel="noopener">
+              {t.openYoutube}
+            </a>
+            <Link className={styles.chevron} href={episodeHref(current.slug, lang)} onClick={() => dialog.current?.close()}>
+              {t.episodePage} <span aria-hidden>›</span>
+            </Link>
+          </div>
         </div>
       </dialog>
     </PlayerContext.Provider>
@@ -148,7 +149,7 @@ function NowPlayingBar() {
           <span>{formatDuration(current.durationMinutes)}</span>
         </span>
       </div>
-      <a className={styles.npBrand} href={site.links.youtube} target="_blank" rel="noopener" tabIndex={visible ? 0 : -1}>
+      <a className={styles.npBrand} href={youtubeUrl(current.youtubeId, site.links.youtube)} target="_blank" rel="noopener" tabIndex={visible ? 0 : -1}>
         <BrandMark size={22} color="currentColor" /> {t.onYoutube}
       </a>
     </div>

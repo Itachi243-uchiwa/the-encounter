@@ -10,9 +10,9 @@ export const features = {
   // Socle V1 (P0)
   podcast: true,
   vision: true,
-  support: true, // lien de soutien externe (Revolut) — pas de paiement intégré
+  support: true, // lien de soutien externe (Revolut), pas de paiement intégré
   collaborate: true,
-  contact: true, // mailto en V1, formulaires plus tard
+  contact: true, // formulaire (Server Action, lib/contact.ts)
 
   // Évolution proche conservée (P1)
   transcripts: true,

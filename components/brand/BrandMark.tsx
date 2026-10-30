@@ -7,8 +7,8 @@ interface BrandMarkProps {
   className?: string;
 }
 
-const MARK_RATIO = 1624 / 2920;
-const WORDMARK_RATIO = 1992 / 640;
+const MARK_RATIO = 1466 / 2733;
+const WORDMARK_RATIO = 2663 / 511;
 
 /** Monogramme « E » étoilé de la charte (logo principal), en vecteur : net à toutes les tailles. */
 export function BrandMark({ size = 40, color = "currentColor", className }: BrandMarkProps) {
@@ -19,7 +19,7 @@ export function BrandMark({ size = 40, color = "currentColor", className }: Bran
   );
 }
 
-/** Logo secondaire « The ENCNTR ». Le nom complet reste lisible par les lecteurs d'écran. */
+/** Logo secondaire « The ENCOUNTER ». Le nom complet reste lisible par les lecteurs d'écran. */
 export function Wordmark({ size = 32, color = "currentColor", className, label = "The Encounter" }: BrandMarkProps & { label?: string }) {
   return (
     <svg role="img" aria-label={label} className={className} viewBox={wordmarkPath.viewBox} height={size} width={Math.round(size * WORDMARK_RATIO)} style={{ display: "inline-block", flex: "none" }}>
