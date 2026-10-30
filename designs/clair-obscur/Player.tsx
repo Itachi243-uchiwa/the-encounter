@@ -4,9 +4,11 @@ import Image from "next/image";
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { BrandMark } from "@/components/brand/BrandMark";
 import { YouTubePlayer } from "@/components/media/YouTubePlayer";
-import { site, themes } from "@/content/site";
+import { site } from "@/content/site";
 import type { Episode } from "@/content/types";
+import { useLang } from "@/lib/i18n";
 import { formatDuration } from "@/lib/navigation";
+import { copy } from "./copy";
 import styles from "./clair-obscur.module.css";
 
 interface PlayerState {
@@ -24,9 +26,6 @@ export function usePlayer() {
   return ctx;
 }
 
-const dateFormat = new Intl.DateTimeFormat("fr-BE", { day: "numeric", month: "short", year: "numeric" });
-export const formatDate = (iso: string) => dateFormat.format(new Date(iso));
-export const themeLabel = (e: Episode) => themes.find((t) => t.id === e.theme)?.label ?? "";
 
 /**
  * L'écoute, comme sur une application de streaming : un épisode « en cours »
@@ -34,7 +33,11 @@ export const themeLabel = (e: Episode) => themes.find((t) => t.id === e.theme)?.
  * fenêtre de lecture YouTube.
  */
 export function PlayerProvider({ episodes, children }: { episodes: Episode[]; children: ReactNode }) {
-  const [current, setCurrent] = useState(episodes[0]);
+  const released = episodes.filter((e) => !e.upcoming);
+  // On retient le slug, pas l'objet : l'épisode suit la langue choisie.
+  const [slug, setSlug] = useState(released[0].slug);
+  const current = released.find((e) => e.slug === slug) ?? released[0];
+  const t = copy[useLang().lang];
   // Change à chaque fermeture : le lecteur est remonté, donc la vidéo s'arrête avec la fenêtre.
   const [session, setSession] = useState(0);
   const dialog = useRef<HTMLDialogElement>(null);
@@ -42,7 +45,7 @@ export function PlayerProvider({ episodes, children }: { episodes: Episode[]; ch
   const select = useCallback(
     (slug: string) => {
       const next = episodes.find((e) => e.slug === slug);
-      if (next) setCurrent(next);
+      if (next && !next.upcoming) setSlug(next.slug);
     },
     [episodes],
   );
@@ -77,8 +80,10 @@ export function PlayerProvider({ episodes, children }: { episodes: Episode[]; ch
           if (e.target === e.currentTarget) dialog.current?.close();
         }}
       >
-        <button type="button" className={styles.dialogClose} onClick={() => dialog.current?.close()} aria-label="Fermer">
-          ✕
+        <button type="button" className={styles.dialogClose} onClick={() => dialog.current?.close()} aria-label={t.close}>
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden>
+            <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          </svg>
         </button>
         <YouTubePlayer
           key={`${current.slug}-${session}`}
@@ -91,13 +96,13 @@ export function PlayerProvider({ episodes, children }: { episodes: Episode[]; ch
         />
         <div className={styles.dialogBody}>
           <p className={styles.dialogMeta}>
-            Épisode {current.number} · {themeLabel(current)} · {formatDuration(current.durationMinutes)}
+            {t.portrait} · {t.episode} {current.number} · {formatDuration(current.durationMinutes)}
           </p>
           <h2 id="dialog-title">{current.title}</h2>
           <p>{current.hook}</p>
-          <blockquote>« {current.quote} »</blockquote>
+          <blockquote>{t.quote(current.quote)}</blockquote>
           <a className={styles.pill} href={site.links.youtube} target="_blank" rel="noopener">
-            Ouvrir sur YouTube
+            {t.openYoutube}
           </a>
         </div>
       </dialog>
@@ -108,6 +113,7 @@ export function PlayerProvider({ episodes, children }: { episodes: Episode[]; ch
 /** La barre « en cours de lecture » : elle apparaît une fois l'ouverture passée. */
 function NowPlayingBar() {
   const { current, play } = usePlayer();
+  const t = copy[useLang().lang];
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -126,12 +132,12 @@ function NowPlayingBar() {
         <span className={styles.npText}>
           <strong>{current.title}</strong>
           <span>
-            The Encounter · Épisode {current.number}
+            The Encounter · {t.episode} {current.number}
           </span>
         </span>
       </div>
       <div className={styles.npControls}>
-        <button type="button" className={styles.npPlay} onClick={() => play()} aria-label={`Lire ${current.title}`} tabIndex={visible ? 0 : -1}>
+        <button type="button" className={styles.npPlay} onClick={() => play()} aria-label={`${t.play} : ${current.title}`} tabIndex={visible ? 0 : -1}>
           <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden>
             <path d="M8 5.5v13l11-6.5z" />
           </svg>
@@ -143,7 +149,7 @@ function NowPlayingBar() {
         </span>
       </div>
       <a className={styles.npBrand} href={site.links.youtube} target="_blank" rel="noopener" tabIndex={visible ? 0 : -1}>
-        <BrandMark size={22} color="currentColor" /> Sur YouTube
+        <BrandMark size={22} color="currentColor" /> {t.onYoutube}
       </a>
     </div>
   );

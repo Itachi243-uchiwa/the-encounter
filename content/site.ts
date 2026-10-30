@@ -4,6 +4,10 @@ export const site = {
   name: "The Encounter",
   shortName: "The ENCNTR",
   tagline: "La rencontre qui transforme",
+  /** Textes d'ouverture validés par la fondatrice. */
+  promise: "Une rencontre avec Dieu peut tout changer.",
+  pitch: "Des conversations autour de la foi, du cheminement et de la transformation.",
+  podcast: "The Encounter Podcast",
   description:
     "The Encounter est une plateforme de conversations qui inspire la foi, l'identité et une vie transformée en Christ.",
   founder: "Jennifer Mondele",

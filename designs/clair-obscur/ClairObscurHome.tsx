@@ -1,128 +1,166 @@
+"use client";
+
 import Image from "next/image";
 import { BrandMark } from "@/components/brand/BrandMark";
 import { MotionRoot } from "@/components/motion/MotionRoot";
 import { journeys } from "@/content/journeys";
 import { clips, photos } from "@/content/media";
 import { askQuestionHref, platforms, site } from "@/content/site";
-import { vision } from "@/content/vision";
-import type { Episode } from "@/content/types";
-import { primaryNavigation } from "@/lib/navigation";
+import { episodeIn, journeyIn } from "@/content/translations";
+import type { Episode, NavItem } from "@/content/types";
+import { LangProvider, useLang } from "@/lib/i18n";
+import { copy } from "./copy";
+import { EncounterHero } from "./EncounterHero";
+import { Intro, INTRO_SECONDS } from "./Intro";
 import { JourneyTile } from "./JourneyTile";
-import { Lantern } from "./Lantern";
+import { Tilt } from "./Tilt";
 import { PlayerProvider } from "./Player";
-import { Playlist, Shelf } from "./Playlist";
-import { SpotlightHero } from "./SpotlightHero";
+import { Playlist } from "./Playlist";
+import { Stories } from "./Stories";
 import { StoryPin } from "./StoryPin";
 import styles from "./clair-obscur.module.css";
 
 interface ClairObscurHomeProps {
   episodes: Episode[];
+  nav: NavItem[];
 }
+
+/** Le plateau du Studio (hero de la maquette 1) : un plan large pour l'écran, un plan en hauteur pour le téléphone. */
+const heroPhotos = [
+  { wide: photos.studioDuo, tall: photos.jenniferLaugh },
+  { wide: photos.studioDuo2, tall: photos.studioEp7 },
+  { wide: photos.studioEp7, tall: photos.jenniferEp2Lamp },
+];
 
 /**
  * Direction 2 — « Clair-obscur » : le noir et la lumière du buisson, mis en scène
  * comme une page produit (récit épinglé, grille de tuiles) et écoutés comme sur
  * une application de streaming (playlist, étagères, barre de lecture).
+ * Bilingue : le changement de langue est instantané.
  */
-export function ClairObscurHome({ episodes }: ClairObscurHomeProps) {
-  const nav = primaryNavigation().map(({ label, anchor }) => ({ label, anchor }));
+export function ClairObscurHome(props: ClairObscurHomeProps) {
+  return (
+    <LangProvider>
+      <Home {...props} />
+    </LangProvider>
+  );
+}
+
+function Home({ episodes: source, nav: navItems }: ClairObscurHomeProps) {
+  const { lang } = useLang();
+  const t = copy[lang];
+  const episodes = source.map((e) => episodeIn(e, lang));
+  const localJourneys = journeys.map((j) => journeyIn(j, lang));
+  const nav = navItems.map(({ anchor }) => ({ anchor, label: t.nav[anchor] ?? anchor }));
 
   return (
     <PlayerProvider episodes={episodes}>
-      <MotionRoot className={styles.page} loadDelay={0}>
-        <SpotlightHero clip={clips.studio} name={site.name} nav={nav} />
+      <Intro />
+      <MotionRoot className={styles.page} loadDelay={INTRO_SECONDS}>
+        <EncounterHero photos={heroPhotos} t={t} nav={nav} />
 
         <main>
           <section className={styles.statement} aria-labelledby="statement-title">
             <h2 id="statement-title" className="visually-hidden">
-              Notre conviction
+              {t.statementTitle}
             </h2>
-            <p className={styles.statementText} data-scrub-words>
-              {vision.burningBush}
+            <p key={lang} className={styles.statementText} data-scrub-words>
+              {t.statement}
             </p>
           </section>
 
-          <Playlist episodes={episodes} />
-          <Shelf episodes={episodes} />
+          <Stories episodes={episodes} t={t} />
 
-          <StoryPin
-            clip={clips.louange}
-            beats={[
-              { title: "La louange d'abord.", text: "La Rencontre commence par l'adoration, pour créer un espace où Dieu se manifeste." },
-              { title: "Une parole qui transforme.", text: "Puis la prédication : de gloire en gloire, une vie renouvelée par la Parole." },
-              { title: "Une rencontre personnelle.", text: "Le but n'est pas un événement. C'est un face-à-face, vrai et profond." },
-            ]}
-          />
+          <Playlist episodes={episodes} t={t} />
+
+          <StoryPin clip={clips.louange} title={t.storyTitle} beats={t.beats} />
 
           <section id="vision" className={styles.bento} aria-labelledby="bento-title">
             <h2 id="bento-title" className="visually-hidden">
               The Encounter
             </h2>
 
-            <Lantern className={styles.bentoGrid}>
-              <article className={`${styles.tile} ${styles.tileHero}`} data-lit data-reveal>
-                <Image src={photos.studioDuo.src} alt={photos.studioDuo.alt} fill sizes="(max-width: 760px) 100vw, 66vw" className={styles.tileBg} />
-                <div className={styles.tileContent}>
-                  <p className={styles.tileBig}>
-                    {episodes.length} épisodes.
-                    <br />
-                    {episodes.length} vies.
-                  </p>
-                  <p>Filmés en entier sur un plateau qui ressemble à un salon.</p>
+            {/* L'article porte l'apparition au défilement ; la carte à l'intérieur porte l'inclinaison. */}
+            <Tilt className={styles.bentoGrid}>
+              <article className={`${styles.tile} ${styles.tileFounder}`} data-reveal>
+                <div className={styles.tileCard} data-tilt>
+                  <div className={styles.tileZoom}>
+                    <Image src={photos.founderBlack.src} alt={photos.founderBlack.alt} fill sizes="(max-width: 760px) 100vw, 42vw" style={{ objectFit: "cover", objectPosition: "50% 20%" }} />
+                  </div>
+                  <div className={styles.tileContent}>
+                    <BrandMark size={40} color="var(--brand-jaune)" />
+                    <p className={styles.tileQuote}>{t.quote(t.founderQuote)}</p>
+                    <p className={styles.tileName}>
+                      <strong>{site.founder}</strong> {t.founderRole}
+                    </p>
+                  </div>
                 </div>
               </article>
 
-              <article className={`${styles.tile} ${styles.tileFounder}`} data-lit data-reveal>
-                <div className={styles.founderImg}>
-                  <Image src={photos.founderPortrait.src} alt={photos.founderPortrait.alt} fill sizes="(max-width: 760px) 100vw, 33vw" style={{ objectFit: "cover" }} />
-                </div>
-                <div className={styles.tileContent}>
-                  <p className={styles.tileQuote}>« {vision.closing} »</p>
-                  <p>{site.founder}, fondatrice</p>
+              <article className={`${styles.tile} ${styles.tileHero}`} data-reveal>
+                <div className={styles.tileCard} data-tilt>
+                  <div className={styles.tileZoom}>
+                    <Image src={photos.studioWide.src} alt={photos.studioWide.alt} fill sizes="(max-width: 760px) 100vw, 58vw" style={{ objectFit: "cover", objectPosition: "50% 45%" }} />
+                  </div>
+                  <div className={styles.tileContent}>
+                    <p className={styles.tileBig}>
+                      {t.bentoBig[0]}
+                      <br />
+                      <span>{t.bentoBig[1]}</span>
+                    </p>
+                    <p>{t.bentoText}</p>
+                  </div>
                 </div>
               </article>
 
               <article className={`${styles.tile} ${styles.tileJourney}`} data-reveal>
-                <JourneyTile journeys={journeys} episodes={episodes} />
-              </article>
-
-              <article className={`${styles.tile} ${styles.tileEvent}`} data-lit data-reveal>
-                <Image src={photos.eventCrowd.src} alt={photos.eventCrowd.alt} fill sizes="(max-width: 760px) 100vw, 33vw" className={styles.tileBg} />
-                <div className={styles.tileContent}>
-                  <p className={styles.tileBig}>27.09.25</p>
-                  <p>La Rencontre : la première soirée de louange en salle.</p>
+                <div className={styles.tileCard} data-tilt>
+                  <JourneyTile journeys={localJourneys} episodes={episodes} t={t} />
                 </div>
               </article>
-            </Lantern>
+
+              <article className={`${styles.tile} ${styles.tileEvent}`} data-reveal>
+                <div className={styles.tileCard} data-tilt>
+                  <div className={styles.tileZoom}>
+                    <Image src={photos.eventCrowd.src} alt={photos.eventCrowd.alt} fill sizes="(max-width: 760px) 100vw, 25vw" style={{ objectFit: "cover" }} />
+                  </div>
+                  <div className={styles.tileContent}>
+                    <p className={styles.tileDate}>
+                      27.09
+                      <span>2025</span>
+                    </p>
+                    <p>{t.eventText}</p>
+                  </div>
+                </div>
+              </article>
+            </Tilt>
           </section>
 
           <section id="soutenir" className={styles.support} aria-labelledby="support-title">
-            <BrandMark size={72} color="var(--warm)" />
-            <h2 id="support-title" data-split="lines">
-              Soutenir la vision.
+            <BrandMark size={72} color="var(--warm)" className={styles.supportMark} />
+            <h2 id="support-title" data-split="lines" key={`s-${lang}`}>
+              {t.supportTitle}
             </h2>
-            <p data-reveal>Un don ponctuel via Revolut finance le studio, les tournages et les Rencontres.</p>
+            <p data-reveal>{t.supportText}</p>
             <div className={styles.heroLinks} data-reveal>
-              <a className={styles.pill} href={site.links.support} target="_blank" rel="noopener">
-                Faire un don
+              <a className={styles.pill} href={site.links.support} target="_blank" rel="noopener" data-magnetic>
+                {t.give}
               </a>
               <a className={styles.chevron} href={askQuestionHref}>
-                Poser une question <span aria-hidden>›</span>
+                {t.ask} <span aria-hidden>›</span>
               </a>
-              <a id="collaborer" className={styles.chevron} href={`mailto:${site.email}?subject=Collaborer%20avec%20The%20Encounter`}>
-                Collaborer <span aria-hidden>›</span>
+              <a id="collaborer" className={styles.chevron} href={`mailto:${site.email}?subject=${encodeURIComponent(`${t.collaborate} — The Encounter`)}`}>
+                {t.collaborate} <span aria-hidden>›</span>
               </a>
             </div>
           </section>
         </main>
 
         <footer className={styles.footer}>
-          <p className={styles.footerNote}>
-            Les épisodes sont publiés en intégralité sur YouTube et en extraits sur TikTok et Instagram.
-          </p>
+          <p className={styles.footerNote}>{t.footerNote}</p>
           <div className={styles.footerCols}>
             <div>
-              <h2>Écouter</h2>
+              <h2>{t.footerListen}</h2>
               <ul>
                 {platforms.map((p) => (
                   <li key={p.name}>
@@ -136,21 +174,27 @@ export function ClairObscurHome({ episodes }: ClairObscurHomeProps) {
             <div>
               <h2>The Encounter</h2>
               <ul>
-                <li><a href="#vision">Notre vision</a></li>
-                <li><a href="#soutenir">Soutenir</a></li>
-                <li><a href="#collaborer">Collaborer</a></li>
+                <li><a href="#vision">{t.footerVision}</a></li>
+                <li><a href="#soutenir">{t.footerSupport}</a></li>
+                <li><a href="#collaborer">{t.collaborate}</a></li>
               </ul>
             </div>
             <div>
-              <h2>Infos</h2>
+              <h2>{t.footerInfo}</h2>
               <ul>
                 <li><a href="/faq">FAQ</a></li>
-                <li><a href="/mentions-legales">Mentions légales</a></li>
-                <li><a href="/confidentialite">Confidentialité</a></li>
+                <li><a href="/mentions-legales">{t.legal}</a></li>
+                <li><a href="/confidentialite">{t.privacy}</a></li>
               </ul>
             </div>
           </div>
-          <p className={styles.footerLegal}>Copyright © 2026 {site.name}. {site.tagline}.</p>
+          <p className={styles.footerLegal}>
+            {t.rights} {t.madeBy}{" "}
+            <a href="https://applicraftstudio.com" target="_blank" rel="noopener">
+              AppliCraft Studio
+            </a>
+            .
+          </p>
         </footer>
       </MotionRoot>
     </PlayerProvider>

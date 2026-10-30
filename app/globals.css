@@ -9,7 +9,6 @@
   --brand-jaune: #ffe432;
   --brand-ivoire: #f8f4ef;
 
-  --font-display: var(--font-anton), Impact, "Arial Narrow", sans-serif;
   --font-serif: var(--font-amiri), Georgia, serif;
   --font-text: var(--font-archivo), "Helvetica Neue", Helvetica, Arial, sans-serif;
 
@@ -67,21 +66,6 @@ a {
   white-space: nowrap;
 }
 
-/* Apparition au défilement — n'agit que si le script a posé .reveal-ready */
-.reveal-ready [data-reveal] {
-  opacity: 0;
-  transform: translateY(24px);
-  transition:
-    opacity 0.8s var(--ease-out),
-    transform 0.8s var(--ease-out);
-  transition-delay: calc(var(--d, 0) * 80ms);
-}
-
-.reveal-ready [data-reveal][data-shown] {
-  opacity: 1;
-  transform: none;
-}
-
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -92,16 +76,6 @@ a {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
-}
-
-/* Fondu du hero : conteneur plein cadre */
-.hero-crossfade {
-  position: absolute;
-  inset: 0;
-}
-
-.hero-crossfade-img {
-  object-fit: cover;
 }
 
 /* Masques des titres animés : un peu d'air pour ne pas rogner les accents des capitales */

@@ -8,6 +8,7 @@ import styles from "./clair-obscur.module.css";
 
 interface StoryPinProps {
   clip: Clip;
+  title: string;
   beats: { title: string; text: string }[];
 }
 
@@ -16,7 +17,7 @@ interface StoryPinProps {
  * au centre pendant que trois phrases se succèdent. Sans animation : les trois
  * phrases s'affichent l'une sous l'autre.
  */
-export function StoryPin({ clip, beats }: StoryPinProps) {
+export function StoryPin({ clip, title, beats }: StoryPinProps) {
   const root = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -44,7 +45,7 @@ export function StoryPin({ clip, beats }: StoryPinProps) {
   return (
     <section ref={root} className={styles.story} aria-labelledby="story-title">
       <h2 id="story-title" className="visually-hidden">
-        Comment le podcast est fait
+        {title}
       </h2>
       <div className={styles.storyStage} data-stage>
         <div className={styles.storyFrame} data-frame>
@@ -53,7 +54,7 @@ export function StoryPin({ clip, beats }: StoryPinProps) {
         </div>
         <div className={styles.storyBeats}>
           {beats.map((beat) => (
-            <div key={beat.title} className={styles.storyBeat} data-beat>
+            <div key={beats.indexOf(beat)} className={styles.storyBeat} data-beat>
               <p className={styles.storyTitle}>{beat.title}</p>
               <p className={styles.storyText}>{beat.text}</p>
             </div>

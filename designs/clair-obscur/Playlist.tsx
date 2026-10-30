@@ -2,129 +2,144 @@
 
 import Image from "next/image";
 import { BrandMark } from "@/components/brand/BrandMark";
-import { themes } from "@/content/site";
+import { photos } from "@/content/media";
+import { site } from "@/content/site";
 import type { Episode } from "@/content/types";
 import { formatDuration } from "@/lib/navigation";
-import { formatDate, themeLabel, usePlayer } from "./Player";
+import type { Copy } from "./copy";
+import { usePlayer } from "./Player";
 import styles from "./clair-obscur.module.css";
 
-const totalLabel = (episodes: Episode[]) => {
-  const minutes = episodes.reduce((n, e) => n + e.durationMinutes, 0);
-  return `${Math.floor(minutes / 60)} h ${minutes % 60} min`;
-};
+const PlayIcon = ({ size = 16 }: { size?: number }) => (
+  <svg viewBox="0 0 24 24" width={size} height={size} fill="currentColor" aria-hidden>
+    <path d="M8 5.5v13l11-6.5z" />
+  </svg>
+);
 
-/** La playlist des épisodes : en-tête, grand bouton lecture, liste numérotée. */
-export function Playlist({ episodes }: { episodes: Episode[] }) {
+/** Les barres de l'égaliseur, sur l'épisode en cours. */
+const Equalizer = () => (
+  <span className={styles.eq} aria-hidden>
+    <span />
+    <span />
+    <span />
+  </span>
+);
+
+/** The Encounter Podcast : en-tête, grand bouton lecture, un portrait par ligne. */
+export function Playlist({ episodes, t }: { episodes: Episode[]; t: Copy }) {
   const { current, play } = usePlayer();
+  const date = new Intl.DateTimeFormat(t.locale, { day: "numeric", month: "short", year: "numeric" });
+  const latest = episodes.find((e) => !e.upcoming);
+  const mosaic = episodes.filter((e) => !e.upcoming).slice(0, 4);
 
   return (
     <section id="podcast" className={styles.playlist} aria-labelledby="playlist-title">
+      {/* La couleur de l'en-tête vient du portrait en cours, comme sur une app de streaming. */}
+      <div className={styles.playlistBackdrop} aria-hidden>
+        {episodes.map((episode) => (
+          <Image
+            key={episode.slug}
+            src={episode.cover.src}
+            alt=""
+            fill
+            sizes="40vw"
+            loading="lazy"
+            data-active={episode.slug === current.slug || undefined}
+          />
+        ))}
+      </div>
+
       <div className={styles.playlistHead}>
-        <div className={styles.playlistCover} aria-hidden>
-          <BrandMark size={120} color="var(--brand-jaune)" />
-          <span>Histoires de Rencontres</span>
+        <div className={styles.playlistCover} aria-hidden data-reveal>
+          {mosaic.map((episode) => (
+            <span key={episode.slug} className={styles.mosaicTile}>
+              <Image src={episode.cover.src} alt="" fill sizes="120px" style={{ objectFit: "cover", objectPosition: "50% 25%" }} />
+            </span>
+          ))}
+          <span className={styles.coverBadge}>
+            <BrandMark size={44} color="var(--brand-jaune)" className={styles.coverMark} />
+          </span>
         </div>
         <div>
-          <p className={styles.playlistKind}>Podcast</p>
-          <h2 id="playlist-title" className={styles.playlistTitle}>
-            Histoires de Rencontres
+          <p className={styles.playlistKind}>{t.podcastKind}</p>
+          <h2 id="playlist-title" className={styles.playlistTitle} data-split="lines" key={t.locale}>
+            {t.podcastTitle}
           </h2>
+          <p className={styles.playlistQuote} data-reveal>
+            {t.quote(t.podcastQuote)}
+          </p>
           <p className={styles.playlistMeta}>
-            <strong>The Encounter</strong> · {episodes.length} épisodes, {totalLabel(episodes)}
+            <span className={styles.avatar}>
+              <Image src={photos.founderBlack.src} alt="" fill sizes="28px" style={{ objectFit: "cover", objectPosition: "50% 20%" }} />
+            </span>
+            <strong>{site.founder}</strong> · The Encounter · {t.portraits}
           </p>
         </div>
       </div>
 
       <div className={styles.playlistActions}>
-        <button type="button" className={styles.bigPlay} onClick={() => play(episodes[0].slug)} aria-label="Lire le dernier épisode">
-          <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor" aria-hidden>
-            <path d="M8 5.5v13l11-6.5z" />
-          </svg>
-        </button>
-        <span className={styles.playlistHint}>Lire le dernier épisode</span>
+        {latest ? (
+          <button type="button" className={styles.bigPlay} onClick={() => play(latest.slug)} aria-label={t.playLatest} data-magnetic>
+            <PlayIcon size={28} />
+          </button>
+        ) : null}
+        <span className={styles.playlistHint}>{t.playLatest}</span>
+        <a className={styles.followPill} href={site.links.youtube} target="_blank" rel="noopener">
+          {t.follow}
+        </a>
       </div>
 
-      <ol className={styles.tracks}>
+      <ol className={styles.tracks} data-stagger>
         <li className={styles.trackHead} aria-hidden>
           <span>#</span>
-          <span>Titre</span>
-          <span>Conversation</span>
-          <span>Date</span>
-          <span>Durée</span>
+          <span>{t.colTitle}</span>
+          <span>{t.colFormat}</span>
+          <span>{t.colDate}</span>
+          <span>{t.colDuration}</span>
         </li>
         {episodes.map((episode) => {
           const active = episode.slug === current.slug;
+          const content = (
+            <>
+              <span className={styles.trackNum}>
+                {active ? <Equalizer /> : <span>{episode.number}</span>}
+                <PlayIcon />
+              </span>
+              <span className={styles.trackMain}>
+                <span className={styles.trackImg}>
+                  <Image src={episode.cover.src} alt="" fill sizes="48px" style={{ objectFit: "cover" }} />
+                </span>
+                <span>
+                  <strong>{episode.title}</strong>
+                  <span>{episode.hook}</span>
+                </span>
+              </span>
+              <span className={styles.trackCol}>{t.portrait}</span>
+              <span className={styles.trackCol}>{date.format(new Date(episode.publishedAt))}</span>
+              <span className={styles.trackDur}>{episode.upcoming ? t.soon : formatDuration(episode.durationMinutes)}</span>
+            </>
+          );
           return (
             <li key={episode.slug}>
-              <button
-                type="button"
-                className={styles.track}
-                data-active={active || undefined}
-                onClick={() => play(episode.slug)}
-                aria-label={`Lire ${episode.title}, épisode ${episode.number}`}
-              >
-                <span className={styles.trackNum}>
-                  <span>{episode.number}</span>
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden>
-                    <path d="M8 5.5v13l11-6.5z" />
-                  </svg>
-                </span>
-                <span className={styles.trackMain}>
-                  <span className={styles.trackImg}>
-                    <Image src={episode.cover.src} alt="" fill sizes="48px" style={{ objectFit: "cover" }} />
-                  </span>
-                  <span>
-                    <strong>{episode.title}</strong>
-                    <span>{episode.hook}</span>
-                  </span>
-                </span>
-                <span className={styles.trackCol}>{themeLabel(episode)}</span>
-                <span className={styles.trackCol}>{formatDate(episode.publishedAt)}</span>
-                <span className={styles.trackDur}>{formatDuration(episode.durationMinutes)}</span>
-              </button>
+              {episode.upcoming ? (
+                <div className={styles.track} data-upcoming>
+                  {content}
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  className={styles.track}
+                  data-active={active || undefined}
+                  onClick={() => play(episode.slug)}
+                  aria-label={`${t.listen} : ${episode.title}, ${t.episode.toLowerCase()} ${episode.number}`}
+                >
+                  {content}
+                </button>
+              )}
             </li>
           );
         })}
       </ol>
-    </section>
-  );
-}
-
-/** Les étagères : une carte par conversation, comme des albums. */
-export function Shelf({ episodes }: { episodes: Episode[] }) {
-  const { play } = usePlayer();
-
-  return (
-    <section className={styles.shelf} aria-labelledby="shelf-title">
-      <div className={styles.shelfHead}>
-        <h2 id="shelf-title">Par conversation</h2>
-        <p>Cinq thèmes, comme des playlists.</p>
-      </div>
-      <ul className={styles.shelfRow}>
-        {themes.map((theme) => {
-          const first = episodes.find((e) => e.theme === theme.id);
-          const count = episodes.filter((e) => e.theme === theme.id).length;
-          if (!first) return null;
-          return (
-            <li key={theme.id}>
-              <button type="button" className={styles.card} onClick={() => play(first.slug)} aria-label={`Lire la conversation ${theme.label}`}>
-                <span className={styles.cardImg}>
-                  <Image src={first.cover.src} alt="" fill sizes="(max-width: 760px) 44vw, 18vw" style={{ objectFit: "cover", objectPosition: "50% 25%" }} />
-                  <span className={styles.cardPlay} aria-hidden>
-                    <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
-                      <path d="M8 5.5v13l11-6.5z" />
-                    </svg>
-                  </span>
-                </span>
-                <strong>{theme.label}</strong>
-                <span>
-                  {count} épisode{count > 1 ? "s" : ""} · {theme.summary}
-                </span>
-              </button>
-            </li>
-          );
-        })}
-      </ul>
     </section>
   );
 }

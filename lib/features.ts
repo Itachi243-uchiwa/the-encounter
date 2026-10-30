@@ -17,7 +17,7 @@ export const features = {
   // Évolution proche conservée (P1)
   transcripts: true,
   playlists: true,
-  themes: true,
+  themes: false, // retour client : les épisodes sont des « Portraits », pas des thèmes
 
   // Hors V1 (barrés dans le cahier)
   events: false,

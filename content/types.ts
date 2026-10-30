@@ -15,11 +15,13 @@ export interface Photo {
   height: number;
 }
 
-/** Court extrait vidéo hébergé (boucle muette). */
+/** Court extrait vidéo hébergé (boucle muette, ou extrait d'épisode lu dans les stories). */
 export interface Clip {
   src: string;
   poster: string;
   alt: string;
+  /** Sous-titres WebVTT, indispensables pour un extrait parlé (lu sans le son par défaut). */
+  captions?: string;
 }
 
 export interface Episode {
@@ -36,6 +38,10 @@ export interface Episode {
   cover: Photo;
   /** Identifiant de la vidéo YouTube (les vidéos ne sont jamais hébergées sur le site). */
   youtubeId?: string;
+  /** Extrait vertical de l'épisode (le même que sur TikTok / Instagram), lu dans les stories. */
+  clip?: Clip;
+  /** Annoncé mais pas encore diffusé : visible, pas encore écoutable. */
+  upcoming?: boolean;
   /** Vrai tant que le titre, la citation et la durée n'ont pas été validés par la fondatrice. */
   sample: boolean;
 }

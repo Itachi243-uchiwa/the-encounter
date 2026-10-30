@@ -20,9 +20,10 @@ class StaticEpisodeRepository implements EpisodeRepository {
     return [...this.source].sort((a, b) => b.number - a.number);
   }
 
+  /** Le dernier épisode diffusé (les épisodes annoncés ne comptent pas). */
   async latest() {
-    const [first] = await this.list();
-    return first;
+    const released = (await this.list()).filter((episode) => !episode.upcoming);
+    return released[0];
   }
 
   async bySlug(slug: string) {

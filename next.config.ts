@@ -5,6 +5,11 @@ const nextConfig: NextConfig = {
   experimental: {
     agentFeedback: true,
   },
+  images: {
+    // Une seule qualité, haute : les photos du plateau ne doivent pas être dégradées par la recompression.
+    qualities: [90],
+    formats: ["image/avif", "image/webp"],
+  },
   cacheComponents: true,
   partialPrefetching: true,
   turbopack: {
