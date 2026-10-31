@@ -95,19 +95,114 @@ export const donorForm = {
   },
 } satisfies Record<Lang, unknown>;
 
-/** L'accusé de réception envoyé à l'expéditeur : un texte fixe, qui ne reprend jamais le message reçu. */
+/**
+ * L'accusé de réception envoyé à l'expéditeur, adapté au formulaire et au sujet.
+ * Texte fixe : il ne reprend jamais le message reçu (le formulaire ne peut pas servir de relais).
+ */
+type ReceiptKind = ContactTopic | "donor";
+interface ReceiptCopy {
+  subject: Record<ReceiptKind, string>;
+  eyebrow: Record<ReceiptKind, string>;
+  title: (firstName: string) => string;
+  lead: Record<ReceiptKind, string>;
+  next: string;
+  meanwhile: string;
+  meanwhileText: string;
+  watch: string;
+  listen: string;
+  faq: string;
+  signature: string;
+  team: string;
+  footer: string;
+}
+
 export const contactReceipt = {
   fr: {
-    subject: "Nous avons bien reçu ton message · The Encounter",
-    body: (name: string) =>
-      `Bonjour ${name},\n\nMerci pour ton message : il est bien arrivé et l'équipe de The Encounter le lira personnellement. Nous te répondons dès que possible.\n\nÀ bientôt,\nThe Encounter`,
+    subject: {
+      question: "Ta question est bien arrivée · The Encounter",
+      testimony: "Merci pour ton témoignage · The Encounter",
+      partnership: "Ta proposition est bien arrivée · The Encounter",
+      invitation: "Merci pour ton invitation · The Encounter",
+      press: "Ta demande est bien arrivée · The Encounter",
+      other: "Nous avons bien reçu ton message · The Encounter",
+      donor: "Merci pour ton don · The Encounter",
+    },
+    eyebrow: {
+      question: "Question reçue",
+      testimony: "Témoignage reçu",
+      partnership: "Proposition reçue",
+      invitation: "Invitation reçue",
+      press: "Demande presse reçue",
+      other: "Message reçu",
+      donor: "Don · Merci",
+    },
+    title: (n) => `Merci, ${n}.`,
+    lead: {
+      question:
+        "Ta question est entre de bonnes mains. L'équipe de The Encounter la lit personnellement et te répond dès que possible.",
+      testimony:
+        "Merci de nous avoir confié ton histoire. Chaque témoignage est lu avec attention, et dans la prière. Si ton histoire peut être racontée dans le podcast, nous reprendrons contact avec toi.",
+      partnership:
+        "Merci de penser à The Encounter. Nous étudions chaque proposition avec soin et revenons vers toi personnellement.",
+      invitation:
+        "Merci pour ton invitation. Nous regardons les dates et les possibilités, puis nous revenons vers toi pour en parler.",
+      press: "Merci pour ta demande. Nous revenons vers toi rapidement avec les éléments dont tu as besoin.",
+      other: "Ton message est bien arrivé. L'équipe de The Encounter le lira personnellement et te répondra dès que possible.",
+      donor:
+        "Ton don permet de filmer de nouvelles histoires et de les partager au plus grand nombre. Si tu nous as confié un sujet de prière, l'équipe priera pour toi.",
+    },
+    next: "Tu peux répondre directement à cet e-mail si tu veux ajouter quelque chose.",
+    meanwhile: "En attendant",
+    meanwhileText: "Des histoires de foi, de cheminement et de transformation, racontées par celles et ceux qui les ont vécues.",
+    watch: "Regarder sur YouTube",
+    listen: "Écouter sur Spotify",
+    faq: "Lire la FAQ",
+    signature: "Avec gratitude,",
+    team: "L'équipe de The Encounter",
+    footer: "Tu reçois cet e-mail parce que tu as écrit à The Encounter depuis le site.",
   },
   en: {
-    subject: "We received your message · The Encounter",
-    body: (name: string) =>
-      `Hello ${name},\n\nThank you for your message: it has arrived and the team at The Encounter will read it personally. We'll get back to you as soon as we can.\n\nSee you soon,\nThe Encounter`,
+    subject: {
+      question: "Your question has arrived · The Encounter",
+      testimony: "Thank you for your testimony · The Encounter",
+      partnership: "Your proposal has arrived · The Encounter",
+      invitation: "Thank you for your invitation · The Encounter",
+      press: "Your request has arrived · The Encounter",
+      other: "We received your message · The Encounter",
+      donor: "Thank you for your gift · The Encounter",
+    },
+    eyebrow: {
+      question: "Question received",
+      testimony: "Testimony received",
+      partnership: "Proposal received",
+      invitation: "Invitation received",
+      press: "Press request received",
+      other: "Message received",
+      donor: "Gift · Thank you",
+    },
+    title: (n) => `Thank you, ${n}.`,
+    lead: {
+      question: "Your question is in good hands. The Encounter team reads it personally and will answer you as soon as possible.",
+      testimony:
+        "Thank you for trusting us with your story. Every testimony is read carefully, and prayerfully. If your story can be told on the podcast, we'll get back in touch with you.",
+      partnership: "Thank you for thinking of The Encounter. We consider every proposal with care and will get back to you personally.",
+      invitation: "Thank you for your invitation. We're looking at dates and possibilities, and will get back to you to talk it through.",
+      press: "Thank you for your request. We'll get back to you quickly with what you need.",
+      other: "Your message has arrived. The Encounter team will read it personally and answer you as soon as possible.",
+      donor:
+        "Your gift helps us film new stories and share them widely. If you shared a prayer request with us, the team will pray for you.",
+    },
+    next: "You can reply directly to this email if you'd like to add anything.",
+    meanwhile: "In the meantime",
+    meanwhileText: "Stories of faith, of journeys and of transformation, told by the people who lived them.",
+    watch: "Watch on YouTube",
+    listen: "Listen on Spotify",
+    faq: "Read the FAQ",
+    signature: "With gratitude,",
+    team: "The Encounter team",
+    footer: "You're receiving this email because you wrote to The Encounter through the website.",
   },
-} satisfies Record<Lang, unknown>;
+} satisfies Record<Lang, ReceiptCopy>;
 
 /** Le panneau à côté de la FAQ, et la table des matières des pages légales. */
 export const infoAside = {

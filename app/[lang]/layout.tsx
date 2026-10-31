@@ -6,6 +6,7 @@ import { site } from "@/content/site";
 import { english } from "@/content/translations";
 import { isLang, langs } from "@/lib/lang";
 import { primaryNavigation } from "@/lib/navigation";
+import { siteUrl } from "@/lib/seo";
 import { episodeRepository } from "@/lib/repositories/episodes";
 import "../globals.css";
 
@@ -35,7 +36,7 @@ export async function generateMetadata({ params }: LayoutProps<"/[lang]">): Prom
   const tagline = lang === "en" ? english.site.tagline : site.tagline;
   return {
     // Adresse publique du site (variable de Vercel) : les images de partage ont besoin d'adresses absolues.
-    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+    metadataBase: new URL(siteUrl),
     title: { default: `${site.name} · ${tagline}`, template: `%s · ${site.name}` },
     description: lang === "en" ? english.site.description : site.description,
     openGraph: { siteName: site.name, locale: lang === "en" ? "en_GB" : "fr_BE", type: "website" },

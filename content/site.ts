@@ -11,7 +11,7 @@ export const site = {
   description:
     "The Encounter est une plateforme de conversations qui inspire la foi, l'identité et une vie transformée en Christ.",
   founder: "Jennifer Mondele",
-  email: "contact@thencounter.be", // Confirmée par la cliente le 30/10
+  email: "contact@thencntr.com", // Boîte Google Workspace du domaine (Squarespace), confirmée le 31/10
   links: {
     youtube: "https://www.youtube.com/channel/UC878pf2VoT_LxXC40uN0gQQ",
     spotify: "https://open.spotify.com/show/3H0Bbb7jQGq6vCHHXkpXUR",

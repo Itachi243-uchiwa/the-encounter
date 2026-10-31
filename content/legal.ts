@@ -134,7 +134,7 @@ export const legalPages: Record<LegalRoute, Record<Lang, LegalDoc>> = {
           paragraphs: ["L'équipe de The Encounter, et les prestataires techniques qui font fonctionner le site :"],
           list: [
             "Vercel Inc. (hébergement du site, États-Unis) ;",
-            "Resend (acheminement des e-mails du formulaire, États-Unis).",
+            "Google (Google Workspace : messagerie du site et acheminement des e-mails du formulaire, Irlande et États-Unis).",
           ],
         },
         {
@@ -184,7 +184,7 @@ export const legalPages: Record<LegalRoute, Record<Lang, LegalDoc>> = {
         {
           title: "Who has access",
           paragraphs: ["The Encounter team, and the technical providers that run the site:"],
-          list: ["Vercel Inc. (site hosting, United States);", "Resend (delivery of the form's emails, United States)."],
+          list: ["Vercel Inc. (site hosting, United States);", "Google (Google Workspace: the site's mailbox and delivery of the form's emails, Ireland and United States)."],
         },
         {
           title: "Transfers outside the European Union",

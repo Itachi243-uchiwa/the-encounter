@@ -5,8 +5,16 @@ import type { Episode } from "@/content/types";
 import { langs, type Lang } from "./lang";
 import { episodeHref, href, type RouteKey } from "./routes";
 
-/** Adresse publique du site (variable de Vercel) : les liens hreflang, le sitemap et le JSON-LD veulent des adresses absolues. */
-export const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
+/** Adresse de production du site. */
+export const productionUrl = "https://www.thencntr.com";
+
+/**
+ * Adresse publique du site : les liens hreflang, le sitemap, le JSON-LD et les e-mails veulent des adresses absolues.
+ * NEXT_PUBLIC_SITE_URL la remplace si besoin ; sinon la production en build, localhost en développement.
+ */
+export const siteUrl = (
+  process.env.NEXT_PUBLIC_SITE_URL ?? (process.env.NODE_ENV === "production" ? productionUrl : "http://localhost:3000")
+).replace(/\/$/, "");
 
 /** Une page dans ses deux langues : adresse canonique + hreflang (le français sert aussi de x-default). */
 export function alternates(path: (lang: Lang) => string, lang: Lang): Metadata["alternates"] {

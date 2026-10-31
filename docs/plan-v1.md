@@ -51,8 +51,8 @@ Shop, back-office d'administration, section Événements, espace membre, abonnem
 
 - J1–J5 : arborescence `[lang]`, `proxy.ts`, nav, pied de page, Podcast, fiches épisodes + images OG, Vision, Soutenir, Collaborer.
 - Soutenir : **formulaire des donateurs** (demande de la cliente) : nom, e-mail, montant facultatif, mot ou sujet de prière.
-- J6 : formulaire de contact (Server Action `lib/contact.ts`, champ piège, 3 envois / 10 min par IP, Resend + accusé de réception à texte fixe, sujet pré-rempli par `?sujet=`) ; Collaborer y mène avec le bon sujet ; FAQ (8 questions proposées, à valider) ; mentions légales, confidentialité, cookies (champs `[à compléter]` en attente de la cliente) ; bandeau cookies, YouTube et Spotify chargés seulement après accord.
-- Variables Vercel à poser : `RESEND_API_KEY`, `CONTACT_FROM` (adresse du domaine vérifié chez Resend), `CONTACT_TO`. Sans clé en local, les messages s'affichent dans le terminal.
+- J6 : formulaire de contact (Server Action `lib/contact.ts`, champ piège, 3 envois / 10 min par IP, SMTP Google Workspace + accusé de réception à texte fixe, sujet pré-rempli par `?sujet=`) ; Collaborer y mène avec le bon sujet ; FAQ (8 questions proposées, à valider) ; mentions légales, confidentialité, cookies (champs `[à compléter]` en attente de la cliente) ; bandeau cookies, YouTube et Spotify chargés seulement après accord.
+- Variables Vercel à poser : `SMTP_USER` (contact@thencntr.com), `SMTP_PASS` (mot de passe d'application Google), `CONTACT_TO` (facultatif). Adresse de production : https://www.thencntr.com (par défaut dans `lib/seo.ts`, `NEXT_PUBLIC_SITE_URL` facultatif). Sans identifiants en local, les messages s'affichent dans le terminal.
 
 ---
 
@@ -91,7 +91,7 @@ Le back-office est exclu de la V1 : le contenu vit dans `content/*.ts`, typé et
 
 ### 3.4 Formulaire de contact
 
-Server Action (guide Forms de Next 16) avec validation côté serveur, champ piège anti-robots, limite d'envoi par IP, envoi par Resend (offre gratuite, domaine à vérifier dans le DNS), accusé de réception à l'expéditeur. Le sujet est pré-rempli selon la provenance (Collaborer, Poser une question). Repli `mailto:` si l'envoi échoue.
+Server Action (guide Forms de Next 16) avec validation côté serveur, champ piège anti-robots, limite d'envoi par IP, envoi par le SMTP Google Workspace de la boîte du domaine (SPF et DKIM déjà en place via Squarespace), accusé de réception à l'expéditeur. Le sujet est pré-rempli selon la provenance (Collaborer, Poser une question). Repli `mailto:` si l'envoi échoue.
 
 ### 3.5 Vidéo et cookies
 
@@ -124,7 +124,7 @@ Contrastes WCAG AA, navigation clavier complète (lecteur, fenêtre, sélecteurs
 | J3 | lun 2/11 | Accueil finalisée avec les retours du tour 1 ; index Podcast | |
 | J4 | mar 3/11 | Fiches épisodes (YouTube, partage, portraits liés), images OG | |
 | J5 | mer 4/11 | Notre vision, Soutenir, Collaborer | |
-| J6 | jeu 5/11 | Contact (Server Action + Resend), FAQ, pages légales, bandeau cookies | Toutes les pages existent |
+| J6 | jeu 5/11 | Contact (Server Action + SMTP Google), FAQ, pages légales, bandeau cookies | Toutes les pages existent |
 | J7 | ven 6/11 | SEO, performance, accessibilité, relecture EN ; preview Vercel complète | **Tour de corrections 2** |
 | J8 | sam 7/11 | Corrections du tour 2, contenus définitifs (IDs YouTube, durées, dates) | |
 | J9 | dim 8/11 | Recette sur appareils, gel du contenu | Feu vert cliente |
@@ -142,11 +142,11 @@ Contrastes WCAG AA, navigation clavier complète (lecteur, fenêtre, sélecteurs
 | Photo et date de l'épisode 8 « L'homme derrière l'artiste » | Fiche « bientôt » | 3/11 |
 | Validation des 7 extraits des stories (passage choisi, sous-titres relus) — extraits faits le 30/10 depuis les vidéos des épisodes | Stories « Ils ont rencontré Dieu » | 3/11 |
 | Relecture de l'anglais par une personne anglophone | Pages EN | 6/11 |
-| ~~Adresse email de contact définitive~~ : reçue le 30/10, `contact@thencounter.be` | Formulaire, pied de page | fait |
+| ~~Adresse email de contact définitive~~ : `contact@thencntr.com` (Google Workspace via Squarespace, 31/10) | Formulaire, pied de page | fait |
 | Questions et réponses de la FAQ | Page FAQ | 4/11 |
 | Mentions légales : nom légal, n° BCE ou personne physique, adresse ; bénéficiaire des dons | Pages légales, Soutenir | 4/11 |
 | Lien Spotify / Apple Podcasts s'il existe | Plateformes d'écoute | 4/11 |
-| Accès DNS du nom de domaine | Mise en ligne, Resend | 6/11 |
+| Accès DNS du nom de domaine | Mise en ligne | 6/11 |
 
 ---
 

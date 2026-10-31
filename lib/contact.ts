@@ -1,8 +1,10 @@
 "use server";
 
 import { headers } from "next/headers";
-import { contactPage, contactReceipt, isContactTopic } from "@/content/contact";
+import nodemailer, { type SendMailOptions, type Transporter } from "nodemailer";
+import { isContactTopic } from "@/content/contact";
 import { site } from "@/content/site";
+import { receiptEmail, teamEmail, type FormKind } from "./email/templates";
 import { isLang, type Lang } from "./lang";
 
 /** Le résultat rendu au formulaire : les champs en erreur, ou l'état de l'envoi. */
@@ -39,19 +41,31 @@ function text(formData: FormData, key: string): string {
   return typeof value === "string" ? value.trim() : "";
 }
 
-async function sendEmail(payload: Record<string, unknown>): Promise<boolean> {
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
+/**
+ * Envoi par le SMTP de Google Workspace (la boîte du domaine, gérée via Squarespace).
+ * SMTP_USER : l'adresse de la boîte ; SMTP_PASS : un mot de passe d'application Google.
+ */
+let transport: Transporter | undefined;
+
+async function sendEmail(mail: SendMailOptions): Promise<boolean> {
+  transport ??= nodemailer.createTransport({
+    host: process.env.SMTP_HOST ?? "smtp.gmail.com",
+    port: 465,
+    secure: true,
+    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
   });
-  if (!res.ok) console.error("Resend", res.status, await res.text());
-  return res.ok;
+  try {
+    await transport.sendMail(mail);
+    return true;
+  } catch (err) {
+    console.error("[contact] SMTP", err);
+    return false;
+  }
 }
 
 /**
  * Formulaire de contact et formulaire des donateurs. Variables d'environnement :
- * RESEND_API_KEY, CONTACT_FROM (adresse d'un domaine vérifié chez Resend),
+ * SMTP_USER, SMTP_PASS (mot de passe d'application Google Workspace),
  * CONTACT_TO (boîte de l'équipe, sinon l'adresse du site).
  */
 export async function sendContact(_prev: ContactState, formData: FormData): Promise<ContactState> {
@@ -78,38 +92,26 @@ export async function sendContact(_prev: ContactState, formData: FormData): Prom
   const ip = (await headers()).get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
   if (rateLimited(ip)) return { status: "rate", values };
 
-  const subject =
-    kind === "donor"
-      ? `Don · ${name}`
-      : `${contactPage.fr.topics[isContactTopic(topic) ? topic : "other"]} · ${name}`;
-  const body = [
-    `${kind === "donor" ? "Donateur" : "Nom"} : ${name}`,
-    `E-mail : ${email}`,
-    amount ? `Montant indiqué : ${amount}` : null,
-    `Langue du site : ${lang.toUpperCase()}`,
-    "",
-    message || "(pas de message)",
-  ]
-    .filter((line) => line !== null)
-    .join("\n");
+  const formKind: FormKind = kind === "donor" ? "donor" : isContactTopic(topic) ? topic : "other";
+  const team = teamEmail({ kind: formKind, lang, name, email, message, amount });
 
-  if (!process.env.RESEND_API_KEY) {
-    // En local, sans clé : le message s'affiche dans le terminal au lieu de partir.
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    // En local, sans identifiants : le message s'affiche dans le terminal au lieu de partir.
     if (process.env.NODE_ENV !== "production") {
-      console.info(`[contact] ${subject}\n${body}`);
+      console.info(`[contact] ${team.subject}\n${team.text}`);
       return { status: "sent" };
     }
-    console.error("[contact] RESEND_API_KEY manquante");
+    console.error("[contact] SMTP_USER ou SMTP_PASS manquant");
     return { status: "error", values };
   }
 
-  const from = process.env.CONTACT_FROM ?? `The Encounter <${site.email}>`;
-  const sent = await sendEmail({ from, to: process.env.CONTACT_TO ?? site.email, reply_to: email, subject, text: body });
+  // Google n'accepte comme expéditeur que la boîte connectée (ou ses alias).
+  const from = { name: site.name, address: process.env.SMTP_USER };
+  const sent = await sendEmail({ from, to: process.env.CONTACT_TO ?? site.email, replyTo: { name, address: email }, ...team });
   if (!sent) return { status: "error", values };
 
-  // Accusé de réception : texte fixe, jamais le message reçu (le formulaire ne peut pas servir de relais).
-  const receipt = contactReceipt[lang];
-  await sendEmail({ from, to: email, subject: receipt.subject, text: receipt.body(name) });
+  // Accusé de réception : texte fixe adapté au formulaire, jamais le message reçu (le formulaire ne peut pas servir de relais).
+  await sendEmail({ from, to: { name, address: email }, ...receiptEmail({ kind: formKind, lang, name }) });
 
   return { status: "sent" };
 }
