@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Amiri, Anton } from "next/font/google";
 import { notFound } from "next/navigation";
 import { SiteShell } from "@/components/site/SiteShell";
@@ -14,6 +14,16 @@ import "../globals.css";
 // là où Impact manque (iPhone, Android) ; Helvetica retombe sur Arial, qui en reprend les proportions.
 const amiri = Amiri({ variable: "--font-amiri", weight: ["400", "700"], style: ["normal", "italic"], subsets: ["latin"] });
 const anton = Anton({ variable: "--font-anton", weight: "400", subsets: ["latin"] });
+
+/**
+ * Le site est noir : barre d'adresse et barres de défilement du navigateur dans la même nuit,
+ * et la page s'étend sous l'encoche (les marges de sécurité sont gérées dans la feuille de style).
+ */
+export const viewport: Viewport = {
+  themeColor: "#000000",
+  colorScheme: "dark",
+  viewportFit: "cover",
+};
 
 /** Les deux langues sont générées à la compilation ; une autre valeur mène à notFound() dans le layout. */
 export function generateStaticParams() {

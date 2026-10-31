@@ -36,7 +36,7 @@ export function InfoPage({ route }: { route: InfoRoute }) {
 
   return (
     <MotionRoot>
-      <main className={styles.inner}>
+      <main id="contenu" tabIndex={-1} className={styles.inner}>
         <PageHead title={page.title} lead={page.lead} />
         {route === "contact" ? <Contact /> : route === "faq" ? <Faq /> : <Legal route={route} />}
       </main>

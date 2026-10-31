@@ -89,6 +89,28 @@
   background: #fff07a;
 }
 
+/* Lien d'évitement : caché hors de l'écran, il descend au-dessus de la navigation dès qu'il reçoit le focus. */
+.skipLink {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  /* Au-dessus de tout, ouverture comprise. */
+  z-index: 200;
+  padding: 12px 20px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #000;
+  font-weight: 600;
+  text-decoration: none;
+  translate: 0 -200%;
+  transition: translate 0.3s var(--spring);
+}
+
+.skipLink:focus-visible {
+  translate: 0 0;
+  outline-color: var(--ink);
+}
+
 .chevron {
   color: var(--warm);
   font-weight: 500;
@@ -167,6 +189,45 @@
 }
 
 /* La nuit du clair-obscur, posée sur le plateau : plus dense en bas, sous le texte. */
+/* En pause, le plan en cours s'arrête aussi de dériver. */
+.hero[data-paused] .heroSlide img {
+  animation-play-state: paused;
+}
+
+/* Pause du diaporama : discrète, dans le coin opposé au texte, à hauteur des boutons. */
+.heroPause {
+  position: absolute;
+  right: var(--margin);
+  bottom: clamp(40px, 9svh, 96px);
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgb(255 255 255 / 0.24);
+  border-radius: 50%;
+  background: rgb(0 0 0 / 0.35);
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s, scale 0.25s var(--spring);
+}
+
+.heroPause:hover {
+  border-color: rgb(255 255 255 / 0.6);
+  background: rgb(0 0 0 / 0.6);
+}
+
+.heroPause:active {
+  scale: 0.92;
+}
+
+/* Sans animation, le diaporama ne tourne pas : rien à mettre en pause. */
+@media (prefers-reduced-motion: reduce) {
+  .heroPause {
+    display: none;
+  }
+}
+
 .heroScrim {
   position: absolute;
   inset: 0;
@@ -178,7 +239,7 @@
 /* Barre de navigation : une capsule de verre qui flotte, plus dense une fois la page défilée. */
 .nav {
   position: fixed;
-  top: 12px;
+  top: calc(12px + env(safe-area-inset-top));
   left: 50%;
   z-index: 30;
   display: flex;
@@ -345,7 +406,7 @@
   z-index: 29;
   display: none;
   grid-template-rows: 1fr auto;
-  padding: 110px var(--margin) 40px;
+  padding: calc(110px + env(safe-area-inset-top)) var(--margin) calc(40px + env(safe-area-inset-bottom));
   background:
     radial-gradient(90% 60% at 50% 0%, rgb(122 26 43 / 0.55), transparent 70%),
     #000;
@@ -768,7 +829,10 @@
 .storyShade {
   position: absolute;
   inset: 0;
-  background: linear-gradient(0deg, rgb(0 0 0 / 0.75), rgb(0 0 0 / 0.1) 60%);
+  /* Un voile au centre, sous les phrases, en plus du fondu du bas : les néons du plafond ne mangent plus le texte. */
+  background:
+    radial-gradient(75% 45% at 50% 50%, rgb(0 0 0 / 0.5), transparent 75%),
+    linear-gradient(0deg, rgb(0 0 0 / 0.75), rgb(0 0 0 / 0.1) 60%);
 }
 
 .storyBeats {
@@ -780,6 +844,11 @@
 
 .storyBeat {
   grid-area: 1 / 1;
+}
+
+.storyTitle,
+.storyText {
+  text-shadow: 0 2px 24px rgb(0 0 0 / 0.55);
 }
 
 .storyTitle {
@@ -1116,7 +1185,7 @@
   position: fixed;
   left: 8px;
   right: 8px;
-  bottom: 8px;
+  bottom: calc(8px + env(safe-area-inset-bottom));
   z-index: 40;
   display: grid;
   grid-template-columns: 1fr minmax(0, 1.4fr) 1fr;
@@ -1199,21 +1268,10 @@
   transform: scale(1.08);
 }
 
-.npProgress {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
+.npDuration {
   color: var(--muted);
   font-size: var(--step-xs);
   font-variant-numeric: tabular-nums;
-}
-
-.npBar {
-  flex: 1;
-  height: 4px;
-  border-radius: 4px;
-  background: #4d4d4f;
 }
 
 .npBrand {
@@ -1600,12 +1658,10 @@
   }
 }
 
-
 @media (prefers-reduced-motion: reduce) {
   .hero {
     height: 100svh;
   }
-
 
   .storyStage {
     height: auto;
@@ -1629,10 +1685,6 @@
   .nowPlaying {
     translate: 0 0;
   }
-}
-
-/* Écrans tactiles : rien ne doit dépendre du survol. */
-@media (hover: none) {
 }
 
 /* Matériaux : plus opaques si l'utilisateur réduit la transparence, bordés s'il demande du contraste. */
@@ -1676,7 +1728,6 @@
   .track .trackCol:nth-of-type(4) {
     display: none;
   }
-
 }
 
 /* ---------- Téléphone ---------- */
@@ -1724,7 +1775,7 @@
     height: 64px;
   }
 
-  .npProgress,
+  .npDuration,
   .npBrand {
     display: none;
   }
@@ -1999,12 +2050,25 @@
   font-size: 15px;
 }
 
+/* Le nom de l'invité cède la place aux boutons : une ligne, coupée au besoin. */
+.storyHeader > span:not([class]) {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.storyControls {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
 .storySound {
   display: grid;
   place-items: center;
   width: 36px;
   height: 36px;
-  margin-left: auto;
   border: 0;
   border-radius: 50%;
   background: rgb(0 0 0 / 0.45);
@@ -2444,9 +2508,7 @@
   .hero {
     height: 100svh;
   }
-
 }
-
 
 /* ---------- Pages intérieures ---------- */
 .inner {
@@ -2497,12 +2559,6 @@
   text-wrap: pretty;
 }
 
-.pageBody {
-  max-width: 860px;
-  margin: 0 auto;
-  padding: 0 var(--margin);
-}
-
 .inner .playlist {
   margin-top: 0;
 }
@@ -2518,33 +2574,11 @@
   font-size: var(--step-s) !important;
 }
 
-.episodeBody {
-  display: grid;
-  justify-items: start;
-  gap: 32px;
-  max-width: 980px;
-  padding: 0 var(--margin);
-}
-
 .episodePlayer {
   width: 100%;
   overflow: hidden;
   border-radius: 20px;
   background: #000;
-}
-
-.episodeQuote {
-  margin: 0;
-}
-
-.episodeQuote p {
-  margin: 0;
-  max-width: 30ch;
-  color: var(--accent);
-  font-family: var(--font-serif);
-  font-style: italic;
-  font-size: clamp(26px, 2.6vw, 38px);
-  line-height: 1.2;
 }
 
 /* Parties d'un épisode publié en plusieurs vidéos, et liens de la fenêtre de lecture. */
@@ -2553,10 +2587,6 @@
   flex-wrap: wrap;
   gap: 8px;
   padding: 14px 16px;
-}
-
-.episodeBody .parts {
-  padding: 0;
 }
 
 .parts button {
@@ -2675,14 +2705,6 @@
   box-shadow: 0 40px 90px rgb(0 0 0 / 0.55);
 }
 
-.epClip {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
 .epCard figcaption {
   position: absolute;
   left: 14px;
@@ -2713,6 +2735,11 @@
   color: var(--muted);
   font-size: var(--step-s);
   font-weight: 600;
+}
+
+/* Sans accord aux cookies, un simple lien à sa taille (la grille l'étirait sur toute la largeur). */
+.epSpotify > a {
+  justify-self: start;
 }
 
 .epSpotify iframe {
@@ -3974,8 +4001,7 @@
 .cookieBanner {
   position: fixed;
   left: 16px;
-  /* Au-dessus de la barre de lecture (72 px + marge). */
-  bottom: 92px;
+  bottom: calc(16px + env(safe-area-inset-bottom));
   z-index: 50;
   display: grid;
   gap: 14px;
@@ -3988,6 +4014,8 @@
   -webkit-backdrop-filter: blur(24px) saturate(1.6);
   font-size: var(--step-s);
   animation: cookieIn 0.5s var(--spring) both;
+  /* Suit la barre de lecture quand elle arrive ou repart. */
+  transition: bottom 0.55s var(--spring);
 }
 
 .cookieBanner p {
@@ -4030,6 +4058,34 @@
   from {
     opacity: 0;
     translate: 0 16px;
+  }
+}
+
+/* La barre de lecture est là : le bandeau monte au-dessus d'elle (72 px + marge). */
+:global(body):has(.nowPlaying[data-visible]) .cookieBanner {
+  bottom: calc(92px + env(safe-area-inset-bottom));
+}
+
+/* Téléphone : un bandeau compact, le texte en petit et les deux boutons côte à côte. */
+@media (max-width: 760px) {
+  .cookieBanner {
+    left: 8px;
+    right: 8px;
+    max-width: none;
+    gap: 10px;
+    padding: 14px 16px;
+    border-radius: 16px;
+    font-size: var(--step-xs);
+    line-height: 1.4;
+  }
+
+  :global(body):has(.nowPlaying[data-visible]) .cookieBanner {
+    bottom: calc(80px + env(safe-area-inset-bottom));
+  }
+
+  .cookieButton {
+    min-height: 44px;
+    padding-block: 8px;
   }
 }
 
@@ -4158,8 +4214,8 @@
 
 /* ---------- Charte : les titres en Impact ----------
  * Une seule graisse, déjà serrée : ni gras de synthèse ni interlettrage négatif.
- * Les petits intitulés du pied de page restent en Helvetica (étiquettes, pas des titres). */
-.page :is(h1, h2, .heroTagline, .tileBig, .tileDate, .storyTitle, .footerTagline):not(.footerBrand h2, .footerCols h2) {
+ * Les petits intitulés du pied de page et des encarts de contact restent en Helvetica (étiquettes, pas des titres). */
+.page :is(h1, h2, .heroTagline, .tileBig, .tileDate, .storyTitle, .footerTagline):not(.footerBrand h2, .footerCols h2, .asideCard h2) {
   font-family: var(--font-title);
   font-weight: 400;
   font-synthesis: none;
@@ -4187,5 +4243,54 @@
 
   .playlistActions .followPill {
     white-space: nowrap;
+  }
+}
+
+/* ---------- Écrans tactiles : 44 px sous le doigt, partout ----------
+ * À la souris rien ne change. Au doigt, les petits ronds gardent leur dessin mais leur zone
+ * de toucher déborde (pseudo-élément invisible) ; les liens et pastilles gagnent de la hauteur.
+ */
+@media (pointer: coarse) {
+  .storySound,
+  .npPlay {
+    position: relative;
+  }
+
+  .storySound::after,
+  .npPlay::after {
+    content: "";
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+  }
+
+  .navBurger {
+    width: 44px;
+    height: 44px;
+  }
+
+  .langSwitch button,
+  .journeyChips button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* inline-block, pas flex : le libellé peut passer à la ligne avec sa flèche, l'espace avant « › » reste. */
+  .chevron,
+  .journeyListen {
+    display: inline-block;
+    padding-block: 10px;
+  }
+
+  .footerCols ul {
+    gap: 0;
+  }
+
+  .footerCols a,
+  .footerLinkButton,
+  .footerBottom a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
   }
 }

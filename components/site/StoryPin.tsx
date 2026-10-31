@@ -25,14 +25,16 @@ export function StoryPin({ clip, title, beats }: StoryPinProps) {
     if (!el) return;
     const { gsap } = getGsap();
     const mm = gsap.matchMedia();
-    mm.add(MOTION_OK, () => {
+    // Sur téléphone, la vidéo part déjà grande : réduite aux deux tiers, elle laissait un écran presque vide.
+    mm.add({ motion: MOTION_OK, phone: "(max-width: 760px)" }, (ctx) => {
+      if (!ctx.conditions?.motion) return;
       const q = gsap.utils.selector(el);
       const items = q("[data-beat]");
       gsap.set(items, { autoAlpha: 0, y: 40 });
       const tl = gsap.timeline({
         scrollTrigger: { trigger: el, start: "top top", end: "+=260%", pin: q("[data-stage]")[0], scrub: 0.6 },
       });
-      tl.fromTo(q("[data-frame]"), { scale: 0.62, borderRadius: "48px" }, { scale: 1, borderRadius: "28px", ease: "none", duration: 1 }, 0);
+      tl.fromTo(q("[data-frame]"), { scale: ctx.conditions.phone ? 0.86 : 0.62, borderRadius: "48px" }, { scale: 1, borderRadius: "28px", ease: "none", duration: 1 }, 0);
       items.forEach((item, i) => {
         const at = 0.25 + i * 0.9;
         tl.to(item, { autoAlpha: 1, y: 0, duration: 0.3 }, at);

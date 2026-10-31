@@ -52,9 +52,22 @@ a {
   color: inherit;
 }
 
+a,
+button,
+summary,
+label {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
 :focus-visible {
   outline: 3px solid var(--brand-jaune);
   outline-offset: 3px;
+}
+
+/* Cibles du lien d'évitement : elles reçoivent le focus pour le clavier, sans cadre autour de la page. */
+[tabindex="-1"]:focus {
+  outline: none;
 }
 
 ::selection {
@@ -79,6 +92,8 @@ a {
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    /* Sans ça, les boucles (égaliseur, anneaux, lueurs) tourneraient encore, à toute vitesse. */
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
 }

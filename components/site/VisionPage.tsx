@@ -22,7 +22,7 @@ export function VisionPage() {
 
   return (
     <MotionRoot>
-      <main className={styles.inner}>
+      <main id="contenu" tabIndex={-1} className={styles.inner}>
         {/* Ouverture : la fondatrice d'abord, la vision à côté d'elle. */}
         <header className={styles.vHero}>
           <figure className={styles.vHeroImg} data-clip>

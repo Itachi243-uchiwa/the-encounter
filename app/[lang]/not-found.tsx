@@ -18,7 +18,7 @@ export default function NotFound() {
   const t = text[lang];
   return (
     <MotionRoot>
-      <main className={styles.inner}>
+      <main id="contenu" tabIndex={-1} className={styles.inner}>
         <PageHead
           title={t.title}
           lead={t.lead}

@@ -47,8 +47,11 @@ next-env.d.ts
 /.taste-skill/
 
 # documents client : sources brutes et documents privés, jamais servis par le site
-/public/dossier-client/
+# (hors de public/ : le traçage du proxy par Turbopack y lisait des vidéos de plusieurs Go et faisait échouer le build)
+/dossier-client/
 /public/*.pdf
 
 # médias non utilisés par les maquettes
 /public/media/founder-family.jpg
+/.agents/*
+.agents

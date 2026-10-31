@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { episodeIn } from "@/content/translations";
 import type { Episode, NavItem } from "@/content/types";
 import { LangProvider, useLang, type Lang } from "@/lib/i18n";
+import { copy } from "./copy";
 import { CookieBanner } from "./CookieBanner";
 import { PlayerProvider } from "./Player";
 import { SiteFooter } from "./SiteFooter";
@@ -34,6 +35,10 @@ function Shell({ episodes, nav, children }: Omit<SiteShellProps, "lang">) {
   return (
     <PlayerProvider episodes={episodes.map((e) => episodeIn(e, lang))}>
       <div className={styles.page}>
+        {/* Premier arrêt du clavier : passer la navigation et aller droit au contenu. */}
+        <a className={styles.skipLink} href="#contenu">
+          {copy[lang].skipToContent}
+        </a>
         <SiteNav items={nav} />
         {children}
         <SiteFooter />

@@ -63,7 +63,7 @@ export function EpisodePage({ episode: source, episodes: all }: EpisodePageProps
 
   return (
     <MotionRoot>
-      <main className={styles.inner}>
+      <main id="contenu" tabIndex={-1} className={styles.inner}>
         {/* Le portrait : l'invité, le titre, la promesse ; à côté, l'extrait qui tourne en boucle. */}
         <header className={styles.epHero}>
           <div className={styles.epBackdrop} aria-hidden>

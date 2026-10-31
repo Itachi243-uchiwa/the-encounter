@@ -143,11 +143,8 @@ function NowPlayingBar() {
             <path d="M8 5.5v13l11-6.5z" />
           </svg>
         </button>
-        <span className={styles.npProgress} aria-hidden>
-          <span>0:00</span>
-          <span className={styles.npBar} />
-          <span>{formatDuration(current.durationMinutes)}</span>
-        </span>
+        {/* La lecture se fait dans la fenêtre YouTube : la barre n'en connaît pas l'avancement, elle donne la durée. */}
+        <span className={styles.npDuration}>{formatDuration(current.durationMinutes)}</span>
       </div>
       <a className={styles.npBrand} href={youtubeUrl(current.youtubeId, site.links.youtube)} target="_blank" rel="noopener" tabIndex={visible ? 0 : -1}>
         <BrandMark size={22} color="currentColor" /> {t.onYoutube}

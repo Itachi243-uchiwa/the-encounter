@@ -49,7 +49,7 @@ export function HomePage({ episodes: source }: HomePageProps) {
       <MotionRoot loadDelay={INTRO_SECONDS}>
         <EncounterHero photos={heroPhotos} t={t} />
 
-        <main>
+        <main id="contenu" tabIndex={-1}>
           <section className={styles.statement} aria-labelledby="statement-title">
             <h2 id="statement-title" className="visually-hidden">
               {t.statementTitle}

@@ -15,7 +15,8 @@ const PHOTO_MS = 7000;
  * connaît déjà (Instagram, TikTok). Chaque story lit l'extrait de l'épisode (sans le son
  * par défaut, sous-titré) ou, tant qu'il n'est pas fourni, sa photo ; la phrase de l'invité
  * et l'épisode sont à un geste. Défilement automatique quand la section est visible, en
- * pause au survol ; gauche/droite de la carte pour revenir ou avancer.
+ * pause au survol, au clavier ou d'un geste (bouton pause, WCAG 2.2.2) ; gauche/droite de la
+ * carte pour revenir ou avancer.
  */
 export function Stories({ episodes, t }: { episodes: Episode[]; t: Copy }) {
   const { play } = usePlayer();
@@ -23,15 +24,17 @@ export function Stories({ episodes, t }: { episodes: Episode[]; t: Copy }) {
   const [index, setIndex] = useState(0);
   const [visible, setVisible] = useState(false);
   const [hovered, setHovered] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const [paused, setPaused] = useState(false);
   const [muted, setMuted] = useState(true);
-  const [progress, setProgress] = useState(0);
   const root = useRef<HTMLElement>(null);
   const video = useRef<HTMLVideoElement>(null);
+  // L'avancement change quatre fois par seconde : écrit directement dans la barre, sans rendu de la section.
+  const bar = useRef<HTMLSpanElement>(null);
   const story = stories[index];
-  const running = visible && !hovered;
+  const running = visible && !hovered && !focused && !paused;
 
   const go = (next: number) => {
-    setProgress(0);
     setIndex((next + stories.length) % stories.length);
   };
 
@@ -68,9 +71,18 @@ export function Stories({ episodes, t }: { episodes: Episode[]; t: Copy }) {
   };
 
   return (
-    <section ref={root} className={styles.stories} aria-labelledby="stories-title" data-playing={running || undefined}>
+    <section
+      ref={root}
+      className={styles.stories}
+      aria-labelledby="stories-title"
+      data-playing={running || undefined}
+      // Au clavier seulement : un clic de souris donne aussi le focus, il ne doit pas tout arrêter.
+      onFocus={(e) => e.target.matches(":focus-visible") && setFocused(true)}
+      onBlur={(e) => !e.currentTarget.contains(e.relatedTarget) && setFocused(false)}
+    >
       <div className={styles.storiesBackdrop} aria-hidden>
-        <Image key={story.slug} src={story.cover.src} alt="" fill sizes="50vw" />
+        {/* Floutée à 70 px : une petite version suffit. */}
+        <Image key={story.slug} src={story.cover.src} alt="" fill sizes="320px" />
       </div>
 
       <div className={styles.storiesIntro}>
@@ -104,8 +116,8 @@ export function Stories({ episodes, t }: { episodes: Episode[]; t: Copy }) {
               {i !== index ? (
                 <span />
               ) : story.clip ? (
-                // Avec un extrait : la barre suit la lecture de la vidéo.
-                <span style={{ width: `${progress * 100}%` }} />
+                // Avec un extrait : la barre suit la lecture de la vidéo (clé propre : elle repart de zéro à chaque histoire).
+                <span key={`${s.slug}-progress`} ref={bar} />
               ) : (
                 <span key={`${s.slug}-${index}`} className={styles.barTimed} onAnimationEnd={next} style={{ animationDuration: `${PHOTO_MS}ms` }} />
               )}
@@ -124,7 +136,9 @@ export function Stories({ episodes, t }: { episodes: Episode[]; t: Copy }) {
               muted={muted}
               playsInline
               preload="metadata"
-              onTimeUpdate={(e) => setProgress(e.currentTarget.currentTime / (e.currentTarget.duration || 1))}
+              onTimeUpdate={(e) => {
+                if (bar.current) bar.current.style.width = `${(e.currentTarget.currentTime / (e.currentTarget.duration || 1)) * 100}%`;
+              }}
               onEnded={next}
             >
               {story.clip.captions ? <track kind="captions" src={story.clip.captions} srcLang={t.locale.slice(0, 2)} label={t.langLabel} default /> : null}
@@ -142,18 +156,31 @@ export function Stories({ episodes, t }: { episodes: Episode[]; t: Copy }) {
           <span>
             <strong>{story.guest ?? t.portrait}</strong> · {t.episode} {story.number}
           </span>
-          {story.clip ? (
-            <button type="button" className={styles.storySound} onClick={toggleSound} aria-pressed={!muted} aria-label={muted ? t.soundOn : t.soundOff}>
-              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden>
-                <path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor" />
-                {muted ? (
-                  <path d="M16 9l5 6M21 9l-5 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                ) : (
-                  <path d="M16 8.5a5 5 0 010 7M18.5 6a8.5 8.5 0 010 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                )}
+          <span className={styles.storyControls}>
+            <button
+              type="button"
+              className={styles.storySound}
+              onClick={() => setPaused((p) => !p)}
+              aria-pressed={paused}
+              aria-label={paused ? t.playStories : t.pauseStories}
+            >
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden>
+                {paused ? <path d="M8 5.5v13l11-6.5z" /> : <path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" />}
               </svg>
             </button>
-          ) : null}
+            {story.clip ? (
+              <button type="button" className={styles.storySound} onClick={toggleSound} aria-pressed={!muted} aria-label={muted ? t.soundOn : t.soundOff}>
+                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden>
+                  <path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor" />
+                  {muted ? (
+                    <path d="M16 9l5 6M21 9l-5 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  ) : (
+                    <path d="M16 8.5a5 5 0 010 7M18.5 6a8.5 8.5 0 010 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  )}
+                </svg>
+              </button>
+            ) : null}
+          </span>
         </div>
 
         {/* Zones de toucher, comme dans une story : gauche pour revenir, droite pour avancer. */}

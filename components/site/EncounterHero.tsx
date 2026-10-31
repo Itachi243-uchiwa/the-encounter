@@ -31,7 +31,7 @@ const TALL_MEDIA = "(max-aspect-ratio: 4 / 5)";
 function HeroPicture({ wide, tall, first }: { wide: Photo; tall: Photo; first: boolean }) {
   const common = { fill: true, sizes: "100vw", alt: first ? wide.alt : "" } as const;
   const { props: { srcSet: tallSet } } = getImageProps({ ...common, src: tall.src });
-  const { props: { alt, ...props } } = getImageProps({ ...common, src: wide.src, loading: first ? "eager" : "lazy", fetchPriority: first ? "high" : "auto" });
+  const { props: { alt, ...props } } = getImageProps({ ...common, src: wide.src, loading: first ? "eager" : "lazy", fetchPriority: first ? "high" : "low" });
   return (
     <picture>
       <source media={TALL_MEDIA} srcSet={tallSet} sizes="100vw" />
@@ -50,9 +50,11 @@ export function EncounterHero({ photos, t }: EncounterHeroProps) {
   const root = useRef<HTMLElement>(null);
   const [active, setActive] = useState(0);
   const [previous, setPrevious] = useState<number | null>(null);
+  // Un défilement automatique de plus de cinq secondes doit pouvoir s'arrêter (WCAG 2.2.2).
+  const [paused, setPaused] = useState(false);
 
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (paused || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     let timer: number | undefined;
     const start = () => {
       timer = window.setInterval(() => {
@@ -72,7 +74,7 @@ export function EncounterHero({ photos, t }: EncounterHeroProps) {
       window.clearInterval(timer);
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [photos.length]);
+  }, [photos.length, paused]);
 
   useEffect(() => {
     const el = root.current;
@@ -90,14 +92,15 @@ export function EncounterHero({ photos, t }: EncounterHeroProps) {
       gsap
         .timeline({ scrollTrigger: { trigger: el, start: "top top", end: "bottom bottom", scrub: 0.8 } })
         .to(q("[data-hero-frame]"), { scale: 0.86, borderRadius: 28, ease: "none" }, 0)
-        .to(q("[data-hero-copy]"), { yPercent: -20, opacity: 0, ease: "none" }, 0);
+        .to(q("[data-hero-copy]"), { yPercent: -20, opacity: 0, ease: "none" }, 0)
+        .to(q("[data-hero-pause]"), { opacity: 0, ease: "none" }, 0);
 
     });
     return () => mm.revert();
   }, []);
 
   return (
-    <header ref={root} className={styles.hero}>
+    <header ref={root} className={styles.hero} data-paused={paused || undefined}>
       <div className={styles.heroStage}>
         <div className={styles.heroFrame} data-hero-frame>
           {photos.map(({ wide, tall }, i) => (
@@ -133,8 +136,20 @@ export function EncounterHero({ photos, t }: EncounterHeroProps) {
             </Link>
           </div>
         </div>
-      </div>
 
+        <button
+          type="button"
+          className={styles.heroPause}
+          onClick={() => setPaused((p) => !p)}
+          aria-pressed={paused}
+          aria-label={paused ? t.playSlides : t.pauseSlides}
+          data-hero-pause
+        >
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden>
+            {paused ? <path d="M8 5.5v13l11-6.5z" /> : <path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" />}
+          </svg>
+        </button>
+      </div>
     </header>
   );
 }

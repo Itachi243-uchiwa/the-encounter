@@ -17,7 +17,7 @@ export function PodcastPage({ episodes: source }: { episodes: Episode[] }) {
 
   return (
     <MotionRoot>
-      <main className={styles.inner}>
+      <main id="contenu" tabIndex={-1} className={styles.inner}>
         <header className={styles.pageHead}>
           <h1 key={lang} data-split="lines" data-split-load>
             {t.pages.podcast.title}

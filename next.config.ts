@@ -11,9 +11,10 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
   },
   // Les fichiers bruts de la cliente (rushes, exports Spotify : des dizaines de Go, ignorés par git) ne font pas
-  // partie du site : le traçage des fichiers serveur ne doit pas les lire (le build échoue sur les vidéos de 4 Go).
+  // partie du site. Ils vivent dans dossier-client/, hors de public/ : Turbopack lisait tout public/ en traçant le
+  // proxy, sans tenir compte de cette exclusion, et le build échouait sur les vidéos de 4 Go.
   outputFileTracingExcludes: {
-    "**": ["public/dossier-client/**/*"],
+    "**": ["dossier-client/**/*"],
   },
   cacheComponents: true,
   partialPrefetching: true,

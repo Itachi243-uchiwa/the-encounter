@@ -17,7 +17,7 @@ export function CollaboratePage() {
 
   return (
     <MotionRoot>
-      <main className={styles.inner}>
+      <main id="contenu" tabIndex={-1} className={styles.inner}>
         <PageHead title={t.pages.collaborate.title} lead={t.pages.collaborate.lead} />
         <section className={styles.cWays} aria-label={t.pages.collaborate.title}>
           <div className={styles.cGrid} data-stagger>

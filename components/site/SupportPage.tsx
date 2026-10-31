@@ -26,7 +26,7 @@ export function SupportPage() {
 
   return (
     <MotionRoot>
-      <main className={styles.inner}>
+      <main id="contenu" tabIndex={-1} className={styles.inner}>
         <PageHead title={t.pages.support.title} lead={t.pages.support.lead} />
 
         <section className={styles.sWhat} aria-labelledby="what-title">

@@ -34,7 +34,8 @@ export function Playlist({ episodes, t }: { episodes: Episode[]; t: Copy }) {
 
   return (
     <section id="podcast" className={styles.playlist} aria-labelledby="playlist-title">
-      {/* La couleur de l'en-tête vient du portrait en cours, comme sur une app de streaming. */}
+      {/* La couleur de l'en-tête vient du portrait en cours, comme sur une app de streaming.
+          Floutées à 60 px, une petite version suffit : rien n'y est net. */}
       <div className={styles.playlistBackdrop} aria-hidden>
         {episodes.map((episode) => (
           <Image
@@ -42,7 +43,7 @@ export function Playlist({ episodes, t }: { episodes: Episode[]; t: Copy }) {
             src={episode.cover.src}
             alt=""
             fill
-            sizes="40vw"
+            sizes="320px"
             loading="lazy"
             data-active={episode.slug === current.slug || undefined}
           />
