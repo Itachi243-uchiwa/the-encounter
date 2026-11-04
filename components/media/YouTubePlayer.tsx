@@ -2,7 +2,10 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { cookieConsent } from "@/content/contact";
 import type { Photo } from "@/content/types";
+import { setConsent, useConsent } from "@/lib/consent";
+import { useLang } from "@/lib/i18n";
 
 interface YouTubePlayerProps {
   /** Sans identifiant (épisode pas encore relié), le lecteur renvoie vers la chaîne. */
@@ -16,12 +19,17 @@ interface YouTubePlayerProps {
 
 /**
  * Lecteur YouTube en « façade » : seule la miniature est chargée ; l'iframe
- * (youtube-nocookie) n'arrive qu'au clic. Aucune vidéo n'est hébergée sur le site.
+ * (youtube-nocookie) n'arrive qu'au clic, et seulement avec l'accord aux cookies tiers.
+ * Sans accord, le clic propose d'accepter ou d'ouvrir la vidéo sur YouTube.
+ * Aucune vidéo n'est hébergée sur le site.
  */
 export function YouTubePlayer({ videoId, title, poster, fallbackUrl, className, sizes = "100vw" }: YouTubePlayerProps) {
-  const [playing, setPlaying] = useState(false);
+  const { lang } = useLang();
+  const t = cookieConsent[lang];
+  const consent = useConsent();
+  const [wanted, setWanted] = useState(false);
 
-  if (playing && videoId) {
+  if (wanted && videoId && consent === "accepted") {
     return (
       <div className={className} data-player="playing">
         <iframe
@@ -35,10 +43,31 @@ export function YouTubePlayer({ videoId, title, poster, fallbackUrl, className, 
     );
   }
 
-  const label = `Regarder « ${title} » sur YouTube`;
+  const label = t.watch(title);
+  const image = <Image src={poster.src} alt={poster.alt} fill sizes={sizes} style={{ objectFit: "cover" }} />;
+
+  if (wanted && videoId) {
+    return (
+      <div className={className} data-player="consent">
+        {image}
+        <div data-player-gate>
+          <p>{t.gate}</p>
+          <div>
+            <button type="button" onClick={() => setConsent("accepted")} autoFocus>
+              {t.gateAccept}
+            </button>
+            <a href={`https://www.youtube.com/watch?v=${videoId}`} target="_blank" rel="noopener">
+              {t.gateOpen}
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const face = (
     <>
-      <Image src={poster.src} alt={poster.alt} fill sizes={sizes} style={{ objectFit: "cover" }} />
+      {image}
       <span data-player-button aria-hidden>
         <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
           <path d="M8 5.5v13l11-6.5z" />
@@ -48,7 +77,7 @@ export function YouTubePlayer({ videoId, title, poster, fallbackUrl, className, 
   );
 
   return videoId ? (
-    <button type="button" className={className} onClick={() => setPlaying(true)} aria-label={label} data-player="idle">
+    <button type="button" className={className} onClick={() => setWanted(true)} aria-label={label} data-player="idle">
       {face}
     </button>
   ) : (

@@ -11,6 +11,11 @@ export function formatDuration(minutes: number): string {
   return `${minutes} min`;
 }
 
+/** Adresse de la vidéo sur YouTube ; sans vidéo reliée, la chaîne. */
+export function youtubeUrl(videoId: string | undefined, fallback: string): string {
+  return videoId ? `https://www.youtube.com/watch?v=${videoId}` : fallback;
+}
+
 export function formatEpisodeNumber(n: number): string {
   return `Épisode ${n}`;
 }

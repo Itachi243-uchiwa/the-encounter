@@ -1,6 +1,6 @@
 "use client";
 
-import { getGsap } from "./gsap";
+import { DESKTOP, getGsap } from "./gsap";
 
 /**
  * Comportements déclaratifs : un design marque ses éléments avec des attributs
@@ -14,6 +14,7 @@ import { getGsap } from "./gsap";
  *   data-parallax="12"        déplacement vertical en pourcentage, lié au défilement
  *   data-scrub-words          les mots s'allument un à un au fil du défilement
  *   data-stagger              les enfants apparaissent en cascade
+ *   data-magnetic             le bouton se laisse attirer par le pointeur (souris uniquement)
  */
 type Behaviour = (root: HTMLElement, ctx: { loadDelay: number }) => void;
 
@@ -28,6 +29,9 @@ const split: Behaviour = (root, { loadDelay }) => {
       type: type === "chars" ? "lines,chars" : "lines",
       mask: "lines",
       linesClass: "splitline",
+      // Lignes : les mots restent entiers, le texte d'origine reste lisible tel quel par les lecteurs d'écran
+      // (« auto » poserait un aria-label, interdit sur <span> et <p>). Lettres : il faut l'étiquette.
+      aria: type === "chars" ? "auto" : "none",
       autoSplit: true,
       onSplit(self) {
         const targets = type === "chars" ? self.chars : self.lines;
@@ -89,7 +93,7 @@ const parallax: Behaviour = (root) => {
 const scrubWords: Behaviour = (root) => {
   const { gsap, SplitText } = getGsap();
   root.querySelectorAll<HTMLElement>("[data-scrub-words]").forEach((el) => {
-    const { words } = SplitText.create(el, { type: "words" });
+    const { words } = SplitText.create(el, { type: "words", aria: "none" });
     gsap.fromTo(
       words,
       { opacity: 0.16 },
@@ -118,4 +122,22 @@ const staggerChildren: Behaviour = (root) => {
   });
 };
 
-export const behaviours: Behaviour[] = [split, reveal, clip, parallax, scrubWords, staggerChildren];
+const magnetic: Behaviour = (root) => {
+  if (!window.matchMedia(DESKTOP).matches) return;
+  const { gsap } = getGsap();
+  root.querySelectorAll<HTMLElement>("[data-magnetic]").forEach((el) => {
+    const toX = gsap.quickTo(el, "x", { duration: 0.6, ease: "power3.out" });
+    const toY = gsap.quickTo(el, "y", { duration: 0.6, ease: "power3.out" });
+    el.addEventListener("pointermove", (e) => {
+      const r = el.getBoundingClientRect();
+      toX((e.clientX - r.left - r.width / 2) * 0.35);
+      toY((e.clientY - r.top - r.height / 2) * 0.35);
+    });
+    el.addEventListener("pointerleave", () => {
+      toX(0);
+      toY(0);
+    });
+  });
+};
+
+export const behaviours: Behaviour[] = [split, reveal, clip, parallax, scrubWords, staggerChildren, magnetic];

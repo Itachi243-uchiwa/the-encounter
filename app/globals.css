@@ -1,6 +1,9 @@
-@import "tailwindcss";
+/* Tailwind ne lit que le code : jamais public/ (dossier client de plusieurs Go, vidéos). */
+@import "tailwindcss" source(none);
+@source "../app";
+@source "../components";
 
-/* Charte graphique The Encounter */
+/* Charte graphique The Encounter (couleurs et typographies du brandboard) */
 :root {
   --brand-bordeaux: #59101c;
   --brand-noir: #000000;
@@ -9,9 +12,10 @@
   --brand-jaune: #ffe432;
   --brand-ivoire: #f8f4ef;
 
-  --font-display: var(--font-anton), Impact, "Arial Narrow", sans-serif;
+  /* Typographies de la charte : Titre = Impact, sous-titre = Amiri, texte courant = Helvetica. */
+  --font-title: Impact, var(--font-anton), "Arial Narrow", sans-serif;
   --font-serif: var(--font-amiri), Georgia, serif;
-  --font-text: var(--font-archivo), "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-text: "Helvetica Neue", Helvetica, Arial, sans-serif;
 
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --margin: clamp(16px, 2.2vw, 32px);
@@ -48,9 +52,22 @@ a {
   color: inherit;
 }
 
+a,
+button,
+summary,
+label {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
 :focus-visible {
   outline: 3px solid var(--brand-jaune);
   outline-offset: 3px;
+}
+
+/* Cibles du lien d'évitement : elles reçoivent le focus pour le clavier, sans cadre autour de la page. */
+[tabindex="-1"]:focus {
+  outline: none;
 }
 
 ::selection {
@@ -67,21 +84,6 @@ a {
   white-space: nowrap;
 }
 
-/* Apparition au défilement — n'agit que si le script a posé .reveal-ready */
-.reveal-ready [data-reveal] {
-  opacity: 0;
-  transform: translateY(24px);
-  transition:
-    opacity 0.8s var(--ease-out),
-    transform 0.8s var(--ease-out);
-  transition-delay: calc(var(--d, 0) * 80ms);
-}
-
-.reveal-ready [data-reveal][data-shown] {
-  opacity: 1;
-  transform: none;
-}
-
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -90,18 +92,10 @@ a {
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    /* Sans ça, les boucles (égaliseur, anneaux, lueurs) tourneraient encore, à toute vitesse. */
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-}
-
-/* Fondu du hero : conteneur plein cadre */
-.hero-crossfade {
-  position: absolute;
-  inset: 0;
-}
-
-.hero-crossfade-img {
-  object-fit: cover;
 }
 
 /* Masques des titres animés : un peu d'air pour ne pas rogner les accents des capitales */

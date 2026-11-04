@@ -6,7 +6,7 @@ export const vision = {
     "Voir chaque personne vivre une rencontre authentique avec Dieu, une rencontre qui transforme, qui restaure et qui repositionne chacun dans sa véritable destinée.",
   burningBush:
     "Comme Moïse au buisson ardent, nous croyons qu'une seule rencontre avec Dieu peut bouleverser une vie, changer une histoire et réveiller un appel.",
-  closing: "J'ai vu le buisson brûler… et ma vie n'a plus jamais été la même.",
+  closing: "J'ai rencontré Dieu… Et ma vie n'a plus jamais été la même.",
   mission: [
     "Vivre la présence de Dieu de manière tangible et personnelle.",
     "Marcher dans une transformation réelle, fruit d'une conversion authentique.",
